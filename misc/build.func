@@ -337,7 +337,7 @@ base_settings() {
   APT_CACHER=""
   APT_CACHER_IP=""
   DISABLEIP6="no"
-  =""
+  MTU=""
   SD=""
   NS=""
   MAC=""
