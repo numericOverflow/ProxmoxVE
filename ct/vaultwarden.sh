@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-source <(curl -s https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
+source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
 # Copyright (c) 2021-2025 tteck
 # Author: tteck (tteckster)
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/dani-garcia/vaultwarden
 
 APP="Vaultwarden"
-var_tags="password-manager"
-var_cpu="4"
-var_ram="6144"
-var_disk="6"
-var_os="debian"
-var_version="12"
-var_unprivileged="1"
+var_tags="${var_tags:-password-manager}"
+var_cpu="${var_cpu:-4}"
+var_ram="${var_ram:-6144}"
+var_disk="${var_disk:-20}"
+var_os="${var_os:-debian}"
+var_version="${var_version:-13}"
+var_unprivileged="${var_unprivileged:-1}"
 
 header_info "$APP"
 variables
@@ -28,10 +28,10 @@ function update_script() {
     exit
   fi
 
-  VAULT=$(curl -s https://api.github.com/repos/dani-garcia/vaultwarden/releases/latest |
+  VAULT=$(curl -fsSL https://api.github.com/repos/dani-garcia/vaultwarden/releases/latest |
     grep "tag_name" |
     awk '{print substr($2, 2, length($2)-3) }')
-  WVRELEASE=$(curl -s https://api.github.com/repos/dani-garcia/bw_web_builds/releases/latest |
+  WVRELEASE=$(curl -fsSL https://api.github.com/repos/dani-garcia/bw_web_builds/releases/latest |
     grep "tag_name" |
     awk '{print substr($2, 2, length($2)-3) }')
 
@@ -42,14 +42,14 @@ function update_script() {
     3>&1 1>&2 2>&3)
 
   if [ "$UPD" == "1" ]; then
-    msg_info "Stopping Vaultwarden"
-    systemctl stop vaultwarden.service
-    msg_ok "Stopped Vaultwarden"
+    msg_info "Stopping Service"
+    systemctl stop vaultwarden
+    msg_ok "Stopped Service"
 
     msg_info "Updating VaultWarden to $VAULT (Patience)"
     cd ~ && rm -rf vaultwarden
     $STD git clone https://github.com/dani-garcia/vaultwarden
-    cd vaultwarden
+    cd vaultwarden || exit
     $STD cargo build --features "sqlite,mysql,postgresql" --release
     DIR=/usr/bin/vaultwarden
     if [ -d "$DIR" ]; then
@@ -57,44 +57,37 @@ function update_script() {
     else
       cp target/release/vaultwarden /opt/vaultwarden/bin/
     fi
+    cd ~ && rm -rf vaultwarden
     msg_ok "Updated VaultWarden"
 
-    msg_info "Cleaning up"
-    cd ~ && rm -rf vaultwarden
-    msg_ok "Cleaned"
-
-    msg_info "Starting Vaultwarden"
-    systemctl start vaultwarden.service
-    msg_ok "Started Vaultwarden"
-
-    msg_ok "$VAULT Update Successful"
+    msg_info "Starting Service"
+    systemctl start vaultwarden
+    msg_ok "Started Service"
+    msg_ok "Updated successfully!"
     exit
   fi
   if [ "$UPD" == "2" ]; then
-    msg_info "Stopping Vaultwarden"
-    systemctl stop vaultwarden.service
-    msg_ok "Stopped Vaultwarden"
+    msg_info "Stopping Service"
+    systemctl stop vaultwarden
+    msg_ok "Stopped Service"
 
     msg_info "Updating Web-Vault to $WVRELEASE"
-    $STD curl -fsSLO https://github.com/dani-garcia/bw_web_builds/releases/download/$WVRELEASE/bw_web_$WVRELEASE.tar.gz
-    $STD tar -zxf bw_web_$WVRELEASE.tar.gz -C /opt/vaultwarden/
+    $STD curl -fsSLO https://github.com/dani-garcia/bw_web_builds/releases/download/"$WVRELEASE"/bw_web_"$WVRELEASE".tar.gz
+    $STD tar -zxf bw_web_"$WVRELEASE".tar.gz -C /opt/vaultwarden/
+    rm bw_web_"$WVRELEASE".tar.gz
     msg_ok "Updated Web-Vault"
 
-    msg_info "Cleaning up"
-    rm bw_web_$WVRELEASE.tar.gz
-    msg_ok "Cleaned"
-
-    msg_info "Starting Vaultwarden"
-    systemctl start vaultwarden.service
-    msg_ok "Started Vaultwarden"
-    msg_ok "$WVRELEASE Update Successful"
+    msg_info "Starting Service"
+    systemctl start vaultwarden
+    msg_ok "Started Service"
+    msg_ok "Updated successfully!"
     exit
   fi
   if [ "$UPD" == "3" ]; then
     if NEWTOKEN=$(whiptail --backtitle "Proxmox VE Helper Scripts" --passwordbox "Set the ADMIN_TOKEN" 10 58 3>&1 1>&2 2>&3); then
       if [[ -z "$NEWTOKEN" ]]; then exit; fi
       if ! command -v argon2 >/dev/null 2>&1; then $STD apt-get install -y argon2; fi
-      TOKEN=$(echo -n ${NEWTOKEN} | argon2 "$(openssl rand -base64 32)" -t 2 -m 16 -p 4 -l 64 -e)
+      TOKEN=$(echo -n "${NEWTOKEN}" | argon2 "$(openssl rand -base64 32)" -t 2 -m 16 -p 4 -l 64 -e)
       sed -i "s|ADMIN_TOKEN=.*|ADMIN_TOKEN='${TOKEN}'|" /opt/vaultwarden/.env
       if [[ -f /opt/vaultwarden/data/config.json ]]; then
         sed -i "s|\"admin_token\":.*|\"admin_token\": \"${TOKEN}\"|" /opt/vaultwarden/data/config.json
@@ -112,4 +105,4 @@ description
 msg_ok "Completed Successfully!\n"
 echo -e "${CREATING}${GN}${APP} setup has been successfully initialized!${CL}"
 echo -e "${INFO}${YW} Access it using the following URL:${CL}"
-echo -e "${TAB}${GATEWAY}${BGN}http://${IP}:8000${CL}"
+echo -e "${TAB}${GATEWAY}${BGN}https://${IP}:8000${CL}"

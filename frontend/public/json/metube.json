@@ -4,14 +4,15 @@
     "categories": [
         11
     ],
-    "date_created": "2024-06-12",
+    "date_created": "2025-12-05",
     "type": "ct",
     "updateable": true,
     "privileged": false,
     "interface_port": 8081,
-    "documentation": null,
+    "documentation": "https://github.com/alexta69/metube/blob/master/README.md",
     "website": "https://github.com/alexta69/metube",
-    "logo": "https://raw.githubusercontent.com/selfhst/icons/refs/heads/main/svg/metube.svg",
+    "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/metube.webp",
+    "config_path": "/opt/metube/.env",
     "description": "MeTube allows you to download videos from YouTube and dozens of other sites.",
     "install_methods": [
         {
@@ -19,10 +20,10 @@
             "script": "ct/metube.sh",
             "resources": {
                 "cpu": 1,
-                "ram": 1024,
+                "ram": 2048,
                 "hdd": 10,
                 "os": "debian",
-                "version": "12"
+                "version": "13"
             }
         }
     ],

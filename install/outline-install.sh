@@ -14,67 +14,52 @@ network_check
 update_os
 
 msg_info "Installing Dependencies"
-$STD apt-get install -y \
-curl \
-sudo \
-mc \
-gnupg \
-mkcert \
-git \
-redis
+$STD apt install -y \
+  mkcert \
+  git \
+  redis
 msg_ok "Installed Dependencies"
 
-msg_info "Setting up Node.js Repository"
-mkdir -p /etc/apt/keyrings
-curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" >/etc/apt/sources.list.d/nodesource.list
-msg_ok "Set up Node.js Repository"
+NODE_VERSION="22" NODE_MODULE="yarn@latest" setup_nodejs
+PG_VERSION="16" setup_postgresql
 
-msg_info "Setting up PostgreSQL Repository"
-curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
-echo "deb https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" >/etc/apt/sources.list.d/pgdg.list
-msg_ok "Set up PostgreSQL Repository"
-
-msg_info "Installing Node.js"
-$STD apt-get update
-$STD apt-get install -y nodejs
-$STD npm install -g yarn
-msg_ok "Installed Node.js"
-
-msg_info "Install/Set up PostgreSQL Database"
-$STD apt-get install -y postgresql-16
+msg_info "Set up PostgreSQL Database"
 DB_NAME="outline"
 DB_USER="outline"
 DB_PASS="$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | cut -c1-13)"
-SECRET_KEY="$(openssl rand -hex 32)"
 $STD sudo -u postgres psql -c "CREATE ROLE $DB_USER WITH LOGIN PASSWORD '$DB_PASS';"
 $STD sudo -u postgres psql -c "CREATE DATABASE $DB_NAME WITH OWNER $DB_USER ENCODING 'UTF8' TEMPLATE template0;"
 $STD sudo -u postgres psql -c "ALTER ROLE $DB_USER SET client_encoding TO 'utf8';"
 $STD sudo -u postgres psql -c "ALTER ROLE $DB_USER SET default_transaction_isolation TO 'read committed';"
 $STD sudo -u postgres psql -c "ALTER ROLE $DB_USER SET timezone TO 'UTC';"
-msg_ok "Set up PostgreSQL"
+{
+  echo "Outline-Credentials"
+  echo "Outline Database User: $DB_USER"
+  echo "Outline Database Password: $DB_PASS"
+  echo "Outline Database Name: $DB_NAME"
+} >>~/outline.creds
+msg_ok "Set up PostgreSQL Database"
 
-msg_info "Setup Outline (Patience)"
-temp_file=$(mktemp)
+fetch_and_deploy_gh_release "outline" "outline/outline" "tarball"
+
+msg_info "Configuring Outline (Patience)"
+SECRET_KEY="$(openssl rand -hex 32)"
 LOCAL_IP="$(hostname -I | awk '{print $1}')"
-RELEASE=$(curl -s https://api.github.com/repos/outline/outline/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4) }')
-wget -q "https://github.com/outline/outline/archive/refs/tags/v${RELEASE}.tar.gz" -O $temp_file
-tar zxf $temp_file
-mv outline-${RELEASE} /opt/outline
 cd /opt/outline
 cp .env.sample .env
+export NODE_ENV=development
 sed -i 's/NODE_ENV=production/NODE_ENV=development/g' /opt/outline/.env
 sed -i "s/generate_a_new_key/${SECRET_KEY}/g" /opt/outline/.env
 sed -i "s/user:pass@postgres/${DB_USER}:${DB_PASS}@localhost/g" /opt/outline/.env
 sed -i 's/redis:6379/localhost:6379/g' /opt/outline/.env
-sed -i "32s#URL=#URL=http://${LOCAL_IP}#g" /opt/outline/.env
+sed -i "5s#URL=#URL=http://${LOCAL_IP}#g" /opt/outline/.env
 sed -i 's/FORCE_HTTPS=true/FORCE_HTTPS=false/g' /opt/outline/.env
-$STD yarn install --frozen-lockfile
 export NODE_OPTIONS="--max-old-space-size=3584"
-$STD yarn build
+$STD yarn install --frozen-lockfile
+export NODE_ENV=production
 sed -i 's/NODE_ENV=development/NODE_ENV=production/g' /opt/outline/.env
-echo "${RELEASE}" >"/opt/${APPLICATION}_version.txt"
-msg_ok "Setup Outline"
+$STD yarn build
+msg_ok "Configured Outline"
 
 msg_info "Creating Service"
 cat <<EOF >/etc/systemd/system/outline.service
@@ -86,7 +71,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/opt/outline
-ExecStart=/usr/bin/node ./build/server/index.js
+ExecStart=/usr/bin/yarn start
 Restart=always
 EnvironmentFile=/opt/outline/.env
 
@@ -98,9 +83,4 @@ msg_ok "Created Service"
 
 motd_ssh
 customize
-
-msg_info "Cleaning up"
-rm -rf $temp_file
-$STD apt-get -y autoremove
-$STD apt-get -y autoclean
-msg_ok "Cleaned"
+cleanup_lxc

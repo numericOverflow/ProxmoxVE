@@ -5,7 +5,7 @@
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://www.cloudflare.com/
 
-source /dev/stdin <<< "$FUNCTIONS_FILE_PATH"
+source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
 color
 verb_ip6
 catch_errors
@@ -13,22 +13,17 @@ setting_up_container
 network_check
 update_os
 
-msg_info "Installing Dependencies"
-$STD apt-get install -y curl
-$STD apt-get install -y sudo
-$STD apt-get install -y mc
-msg_ok "Installed Dependencies"
-
 msg_info "Installing Cloudflared"
-mkdir -p --mode=0755 /usr/share/keyrings
-VERSION="$(awk -F'=' '/^VERSION_CODENAME=/{ print $NF }' /etc/os-release)"
-curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg >/usr/share/keyrings/cloudflare-main.gpg
-echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared $VERSION main" >/etc/apt/sources.list.d/cloudflared.list
-$STD apt-get update
-$STD apt-get install -y cloudflared
+setup_deb822_repo \
+  "cloudflared" \
+  "https://pkg.cloudflare.com/cloudflare-main.gpg" \
+  "https://pkg.cloudflare.com/cloudflared/" \
+  "any" \
+  "main"
+$STD apt install -y cloudflared
 msg_ok "Installed Cloudflared"
 
-read -r -p "Would you like to configure cloudflared as a DNS-over-HTTPS (DoH) proxy? <y/N> " prompt
+read -r -p "${TAB3}Would you like to configure cloudflared as a DNS-over-HTTPS (DoH) proxy? <y/N> " prompt
 if [[ ${prompt,,} =~ ^(y|yes)$ ]]; then
   msg_info "Creating Service"
   cat <<EOF >/usr/local/etc/cloudflared/config.yml
@@ -59,14 +54,10 @@ KillMode=process
 [Install]
 WantedBy=multi-user.target
 EOF
-  systemctl enable -q --now cloudflared.service
+  systemctl enable -q --now cloudflared
   msg_ok "Created Service"
 fi
 
 motd_ssh
 customize
-
-msg_info "Cleaning up"
-$STD apt-get -y autoremove
-$STD apt-get -y autoclean
-msg_ok "Cleaned"
+cleanup_lxc

@@ -1,18 +1,21 @@
-import { AlertColors } from "@/config/siteConfig";
+import type { AlertColors } from "@/config/site-config";
 
 export type Script = {
   name: string;
   slug: string;
   categories: number[];
   date_created: string;
-  type: "vm" | "ct" | "misc";
+  type: "vm" | "ct" | "pve" | "addon";
   updateable: boolean;
   privileged: boolean;
   interface_port: number | null;
   documentation: string | null;
   website: string | null;
   logo: string | null;
+  config_path: string;
   description: string;
+  disable?: boolean;
+  disable_description?: string;
   install_methods: {
     type: "default" | "alpine";
     script: string;
@@ -40,6 +43,8 @@ export type Category = {
   name: string;
   id: number;
   sort_order: number;
+  description: string;
+  icon: string;
   scripts: Script[];
 };
 
@@ -47,18 +52,18 @@ export type Metadata = {
   categories: Category[];
 };
 
-export interface Version {
+export type Version = {
   name: string;
   slug: string;
-}
+};
 
-export interface OperatingSystem {
+export type OperatingSystem = {
   name: string;
   versions: Version[];
-}
+};
 
-export interface AppVersion {
+export type AppVersion = {
   name: string;
   version: string;
   date: Date;
-}
+};

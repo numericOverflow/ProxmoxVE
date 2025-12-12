@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-source <(curl -s https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
+source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
 # Copyright (c) 2021-2025 tteck
 # Author: tteck (tteckster)
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/bastienwirtz/homer
 
 APP="Homer"
-var_tags="dashboard"
-var_cpu="1"
-var_ram="512"
-var_disk="2"
-var_os="debian"
-var_version="12"
-var_unprivileged="1"
+var_tags="${var_tags:-dashboard}"
+var_cpu="${var_cpu:-1}"
+var_ram="${var_ram:-512}"
+var_disk="${var_disk:-2}"
+var_os="${var_os:-debian}"
+var_version="${var_version:-12}"
+var_unprivileged="${var_unprivileged:-1}"
 
 header_info "$APP"
 variables
@@ -27,9 +27,9 @@ function update_script() {
         msg_error "No ${APP} Installation Found!"
         exit
     fi
-    msg_info "Stopping ${APP}"
+    msg_info "Stopping Service"
     systemctl stop homer
-    msg_ok "Stopped ${APP}"
+    msg_ok "Stopped Service"
 
     msg_info "Backing up assets directory"
     cd ~
@@ -40,7 +40,7 @@ function update_script() {
     msg_info "Updating ${APP}"
     rm -rf /opt/homer/*
     cd /opt/homer
-    wget -q https://github.com/bastienwirtz/homer/releases/latest/download/homer.zip
+    curl -fsSL "https://github.com/bastienwirtz/homer/releases/latest/download/homer.zip" -o $(basename "https://github.com/bastienwirtz/homer/releases/latest/download/homer.zip")
     $STD unzip homer.zip
     msg_ok "Updated ${APP}"
 
@@ -53,10 +53,10 @@ function update_script() {
     rm -rf assets-backup /opt/homer/homer.zip
     msg_ok "Cleaned"
 
-    msg_info "Starting ${APP}"
+    msg_info "Starting Service"
     systemctl start homer
-    msg_ok "Started ${APP}"
-    msg_ok "Updated Successfully"
+    msg_ok "Started Service"
+    msg_ok "Updated successfully!"
     exit
 }
 

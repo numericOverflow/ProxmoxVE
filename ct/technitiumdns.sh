@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-source <(curl -s https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
+source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
 # Copyright (c) 2021-2025 tteck
 # Author: tteck (tteckster)
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://technitium.com/dns/
 
 APP="Technitium DNS"
-var_tags="dns"
-var_cpu="1"
-var_ram="512"
-var_disk="2"
-var_os="debian"
-var_version="12"
-var_unprivileged="1"
+var_tags="${var_tags:-dns}"
+var_cpu="${var_cpu:-1}"
+var_ram="${var_ram:-512}"
+var_disk="${var_disk:-2}"
+var_os="${var_os:-debian}"
+var_version="${var_version:-13}"
+var_unprivileged="${var_unprivileged:-1}"
 
 header_info "$APP"
 variables
@@ -27,17 +27,31 @@ function update_script() {
     msg_error "No ${APP} Installation Found!"
     exit
   fi
-  msg_info "Updating ${APP}"
 
-  if ! dpkg -s aspnetcore-runtime-8.0 >/dev/null 2>&1; then
-    wget -q https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb
-    $STD dpkg -i packages-microsoft-prod.deb
-    $STD apt-get update
-    $STD apt-get install -y aspnetcore-runtime-8.0
-    rm packages-microsoft-prod.deb
+  if is_package_installed "aspnetcore-runtime-8.0"; then
+    $STD apt remove -y aspnetcore-runtime-8.0
+    [ -f /etc/apt/sources.list.d/microsoft-prod.list ] && rm -f /etc/apt/sources.list.d/microsoft-prod.list
+    [ -f /usr/share/keyrings/microsoft-prod.gpg ] && rm -f /usr/share/keyrings/microsoft-prod.gpg
+    setup_deb822_repo \
+      "microsoft" \
+      "https://packages.microsoft.com/keys/microsoft-2025.asc" \
+      "https://packages.microsoft.com/debian/13/prod/" \
+      "trixie" \
+      "main"
+    $STD apt install -y aspnetcore-runtime-9.0
   fi
-  $STD bash <(curl -fsSL https://download.technitium.com/dns/install.sh)
-  msg_ok "Updated Successfully"
+
+  RELEASE=$(curl -fsSL https://technitium.com/dns/ | grep -oP 'Version \K[\d.]+')
+  if [[ ! -f ~/.technitium || "${RELEASE}" != "$(cat ~/.technitium)" ]]; then
+    msg_info "Updating Technitium DNS"
+    curl -fsSL "https://download.technitium.com/dns/DnsServerPortable.tar.gz" -o /opt/DnsServerPortable.tar.gz
+    $STD tar zxvf /opt/DnsServerPortable.tar.gz -C /opt/technitium/dns/
+    rm -f /opt/DnsServerPortable.tar.gz
+    msg_ok "Updated Technitium DNS"
+    msg_ok "Updated successfully!"
+  else
+    msg_ok "No update required.  Technitium DNS is already at v${RELEASE}."
+  fi
   exit
 }
 

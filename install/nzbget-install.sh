@@ -6,7 +6,7 @@
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://nzbget.com/
 
-source /dev/stdin <<< "$FUNCTIONS_FILE_PATH"
+source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
 color
 verb_ip6
 catch_errors
@@ -15,31 +15,32 @@ network_check
 update_os
 
 msg_info "Installing Dependencies"
-$STD apt-get install -y curl
-$STD apt-get install -y sudo
-$STD apt-get install -y mc
-$STD apt-get install -y gpg
-$STD apt-get install -y par2
+$STD apt install -y \
+  par2
+
 cat <<EOF >/etc/apt/sources.list.d/non-free.list
 deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
 EOF
-$STD apt-get update
-$STD apt-get install -y unrar
+$STD apt update
+$STD apt install -y unrar
 rm /etc/apt/sources.list.d/non-free.list
 msg_ok "Installed Dependencies"
 
 msg_info "Installing NZBGet"
-mkdir -p /etc/apt/keyrings
-curl -fsSL https://nzbgetcom.github.io/nzbgetcom.asc | gpg --dearmor -o /etc/apt/keyrings/nzbgetcom.gpg
-echo "deb [arch=all signed-by=/etc/apt/keyrings/nzbgetcom.gpg] https://nzbgetcom.github.io/deb stable main" >/etc/apt/sources.list.d/nzbgetcom.list
-$STD apt-get update
-$STD apt-get install -y nzbget
+mkdir -p /usr/share/keyrings
+curl -fsSL https://nzbgetcom.github.io/nzbgetcom.asc | gpg --dearmor -o /usr/share/keyrings/nzbgetcom.gpg
+cat <<EOF >/etc/apt/sources.list.d/nzbgetcom.sources
+Types: deb
+URIs: https://nzbgetcom.github.io/deb
+Suites: stable
+Components: main
+Architectures: all
+Signed-By: /usr/share/keyrings/nzbgetcom.gpg
+EOF
+$STD apt update
+$STD apt install -y nzbget
 msg_ok "Installed NZBGet"
 
 motd_ssh
 customize
-
-msg_info "Cleaning up"
-$STD apt-get -y autoremove
-$STD apt-get -y autoclean
-msg_ok "Cleaned"
+cleanup_lxc

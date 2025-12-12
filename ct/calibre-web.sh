@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-source <(curl -s https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
+source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
 # Copyright (c) 2021-2025 tteck
 # Author: tteck (tteckster) | Co-Author: remz1337
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/janeczku/calibre-web
 
 APP="Calibre-Web"
-var_tags="eBook"
-var_cpu="2"
-var_ram="2048"
-var_disk="4"
-var_os="debian"
-var_version="12"
-var_unprivileged="1"
+var_tags="${var_tags:-eBook}"
+var_cpu="${var_cpu:-2}"
+var_ram="${var_ram:-2048}"
+var_disk="${var_disk:-4}"
+var_os="${var_os:-debian}"
+var_version="${var_version:-12}"
+var_unprivileged="${var_unprivileged:-1}"
 
 header_info "$APP"
 variables
@@ -27,22 +27,22 @@ function update_script() {
     msg_error "No ${APP} Installation Found!"
     exit
   fi
-  msg_info "Stopping ${APP}"
+  msg_info "Stopping Service"
   systemctl stop cps
-  msg_ok "Stopped ${APP}"
+  msg_ok "Stopped Service"
 
   msg_info "Updating ${APP}"
   cd /opt/kepubify
   rm -rf kepubify-linux-64bit
   curl -fsSLO https://github.com/pgaskin/kepubify/releases/latest/download/kepubify-linux-64bit
   chmod +x kepubify-linux-64bit
-  menu_array=("1" "Enables gdrive as storage backend for your ebooks" OFF \
-    "2" "Enables sending emails via a googlemail account without enabling insecure apps" OFF \
-    "3" "Enables displaying of additional author infos on the authors page" OFF \
-    "4" "Enables login via LDAP server" OFF \
-    "5" "Enables login via google or github oauth" OFF \
-    "6" "Enables extracting of metadata from epub, fb2, pdf files, and also extraction of covers from cbr, cbz, cbt files" OFF \
-    "7" "Enables extracting of metadata from cbr, cbz, cbt files" OFF \
+  menu_array=("1" "Enables gdrive as storage backend for your ebooks" OFF
+    "2" "Enables sending emails via a googlemail account without enabling insecure apps" OFF
+    "3" "Enables displaying of additional author infos on the authors page" OFF
+    "4" "Enables login via LDAP server" OFF
+    "5" "Enables login via google or github oauth" OFF
+    "6" "Enables extracting of metadata from epub, fb2, pdf files, and also extraction of covers from cbr, cbz, cbt files" OFF
+    "7" "Enables extracting of metadata from cbr, cbz, cbt files" OFF
     "8" "Enables syncing with your kobo reader" OFF)
   if [ -f "/opt/calibre-web/options.txt" ]; then
     cps_options="$(cat /opt/calibre-web/options.txt)"
@@ -104,7 +104,7 @@ function update_script() {
         ;;
       *)
         echo "Unsupported item $CHOICE!" >&2
-        exit 1
+        exit
         ;;
       esac
     done
@@ -121,10 +121,10 @@ function update_script() {
     $STD pip install --upgrade calibreweb
   fi
 
-  msg_info "Starting ${APP}"
+  msg_info "Starting Service"
   systemctl start cps
-  msg_ok "Started ${APP}"
-  msg_ok "Updated Successfully"
+  msg_ok "Started Service"
+  msg_ok "Updated successfully!"
   exit
 }
 
