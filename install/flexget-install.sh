@@ -31,7 +31,7 @@ msg_ok "Installed FlexGet"
 
 msg_info "Creating symlink to config for easy access"
 mkdir /root/.flexget
-ln -s /root/.flexget /root/flexget
+#ln -s /root/.flexget /root/flexget
 msg_ok "Symlink '/root/flexget' added"
 
 msg_info "Setup FlexGet log rotation"
@@ -54,18 +54,18 @@ FLEXGET_CONFIG_FILE="/root/.flexget/config.yml"
 mkdir -p "$(dirname "${FLEXGET_CONFIG_FILE}")"
 
 if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
-    echo -e "${INFO}${YW} The FlexGet config file already exists so we will not modify it."
+    echo -e "${INFO}${YW} The FlexGet config file already exists so we will not modify it.${CL}"
 else
-    echo -e "${INFO}${YW} The FlexGet config file not found, so downloading a default config.yml from github."
+    echo -e "${INFO}${YW} The FlexGet config file not found, so downloading a default config.yml from github.${CL}"
     curl -fsSL "https://raw.githubusercontent.com/Flexget/Flexget/develop/tests/api_tests/raw_config.yml" -o "${TEMP_CONFIG_FILE}"
     
     if [ $? -eq 0 ]; then
         mkdir -p "$(dirname "${FLEXGET_CONFIG_FILE}")"
         mv "${TEMP_CONFIG_FILE}" "${FLEXGET_CONFIG_FILE}" 
         
-        echo -e "${INFO}${YW} The FlexGet latest test config file was pulled from github."
+        echo -e "${INFO}${YW} The FlexGet latest test config file was pulled from github.${CL}"
     else
-        echo -e "${INFO}${YW} Could not pull test config from github, using a generic one as last resort"
+        echo -e "${INFO}${YW} Could not pull test config from github, using a generic one as last resort${CL}"
 
         # Write generic config directly to final file (no need for temp file here)
         cat <<EOF > "${FLEXGET_CONFIG_FILE}"
@@ -92,8 +92,8 @@ msg_info "Cleaning up"
 #rm -f /tmp/flexget_release_${RELEASE}/*
 rm -f "${TEMP_CONFIG_FILE}"
 
-echo -e "${INFO}${YW} FlexGet is configured as Deamon. Use 'schedules' in you config" 
-echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler#period"
+echo -e "${INFO}${YW} FlexGet is configured as Deamon. Use 'schedules' in you config${CL}" 
+echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler#period${CL}"
 
 motd_ssh
 customize
