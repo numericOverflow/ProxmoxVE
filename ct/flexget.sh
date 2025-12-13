@@ -86,6 +86,15 @@ function update_script() {
 #    exit
 #  fi
 
+  msg_info "Stop existing Flexget daemon (if exists)"
+  # The [f]lexget trick prevents the grep command from matching itself
+  if ps aux | grep "[f]lexget" > /dev/null; then
+      msg_info "flexget is running (via ps/grep) so stopping before we update"
+	  flexget daemon stop
+  else
+      msg_info "flexget is NOT running (via ps/grep)."
+  fi  
+  
   msg_info "Setting up uv python"
   PYTHON_VERSION="3.13" setup_uv
   export PATH="/root/.local/bin:$PATH"
@@ -95,6 +104,12 @@ function update_script() {
   $STD uv tool upgrade --python 3.13 flexget[locked,all]
   #systemctl restart open-webui
   msg_ok "Updated FlexGet"
+  
+  msg_info "Starting FlexGet daemon"
+  echo -e "\n"
+  flexget daemon start -d --autoreload-config
+  echo -e "\n"
+
   msg_ok "Updated successfully!"
   exit
 }

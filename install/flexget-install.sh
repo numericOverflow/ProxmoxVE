@@ -31,7 +31,7 @@ msg_ok "Installed FlexGet"
 
 msg_info "Creating symlink to config for easy access"
 mkdir /root/.flexget
-#ln -s /root/.flexget /root/flexget
+ln -s /root/.flexget /root/flexget
 msg_ok "Symlink '/root/flexget' added"
 
 msg_info "Setup FlexGet log rotation"
