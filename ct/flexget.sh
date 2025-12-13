@@ -86,9 +86,12 @@ function update_script() {
 #    exit
 #  fi
 
+  msg_info "Setting up uv python"
+  PYTHON_VERSION="3.13" setup_uv
+  msg_ok "Installed uv"
+
   msg_info "Updating FlexGet (uv-based version)"
-  PYTHON_VERSION="3.14" setup_uv
-  $STD uv tool upgrade --python 3.14 flexget[all]
+  $STD uv tool upgrade --python 3.13 flexget[all]
   #systemctl restart open-webui
   msg_ok "Updated FlexGet"
   msg_ok "Updated successfully!"
