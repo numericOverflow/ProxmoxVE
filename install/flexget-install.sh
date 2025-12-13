@@ -11,14 +11,7 @@ verb_ip6
 catch_errors
 setting_up_container
 network_check
-#update_os
-msg_info "RE-ENABLE OS UPDATE!!!!"
-msg_info "RE-ENABLE OS UPDATE!!!!"
-msg_info "RE-ENABLE OS UPDATE!!!!"
-msg_info "RE-ENABLE OS UPDATE!!!!"
-msg_info "RE-ENABLE OS UPDATE!!!!"
-msg_info "RE-ENABLE OS UPDATE!!!!"
-msg_info "RE-ENABLE OS UPDATE!!!!"
+update_os
 
 msg_info "Setting up uv python"
 PYTHON_VERSION="3.13" setup_uv
