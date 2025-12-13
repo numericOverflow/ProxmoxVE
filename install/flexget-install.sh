@@ -37,7 +37,7 @@ msg_ok "Installed FlexGet"
 
 
 msg_info "Creating basic FlexGet config.yml"
-mkdir /.flexget/
+mkdir /root/.flexget
 
 FLEXGET_CONFIG_FILE="/root/.flexget/config.yml"
 if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
