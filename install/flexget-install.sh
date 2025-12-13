@@ -13,11 +13,10 @@ setting_up_container
 network_check
 update_os
 
-EXPORT FLEXGET_PYTHON_VERSION=3.14
-PYTHON_VERSION="$FLEXGET_PYTHON_VERSION" setup_uv
+PYTHON_VERSION="3.14" setup_uv
 
 msg_info "Installing FlexGet (uv-based version)"
-$STD uv tool install --python $FLEXGET_PYTHON_VERSION flexget[all]
+$STD uv tool install --python 3.14 flexget[all]
 msg_ok "Installed FlexGet"
 
 motd_ssh
