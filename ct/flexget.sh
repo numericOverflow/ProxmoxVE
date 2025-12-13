@@ -88,10 +88,11 @@ function update_script() {
 
   msg_info "Setting up uv python"
   PYTHON_VERSION="3.13" setup_uv
+  export PATH="/root/.local/bin:$PATH"
   msg_ok "Installed uv"
 
   msg_info "Updating FlexGet (uv-based version)"
-  $STD uv tool upgrade --python 3.13 flexget[all]
+  $STD uv tool upgrade --python 3.13 flexget[locked,all]
   #systemctl restart open-webui
   msg_ok "Updated FlexGet"
   msg_ok "Updated successfully!"
@@ -105,4 +106,5 @@ description
 msg_ok "Completed Successfully!\n"
 echo -e "${CREATING}${GN}${APP} setup has been successfully initialized!${CL}"
 echo -e "${INFO}${YW} Access it using the following URL:${CL}"
-echo -e "${TAB}${GATEWAY}${BGN}http://${IP}:8080${CL}"
+echo -e "${INFO}${YW} (assuming you have 'web_server: yes' in your config.yml)${CL}"
+echo -e "${TAB}${GATEWAY}${BGN}http://${IP}:5050${CL}"
