@@ -31,27 +31,27 @@ msg_ok "Installed FlexGet"
 #  mkdir -p /tmp/flexget_release_${RELEASE}
 #  curl -fsSL "https://github.com/Flexget/Flexget/releases/download/v${RELEASE}/flexget-${RELEASE}.tar.gz" -o "$temp_file"
 #  tar zxf "$temp_file" --strip-components=1 -C /tmp/flexget_release_${RELEASE}
-#  cp /tmp/flexget_release_${RELEASE}/flexget-${RELEASE}-/ ~/.flexget/config.yml
+#  cp /tmp/flexget_release_${RELEASE}/flexget-${RELEASE}-/ ${HOME}/.flexget/config.yml
 
 
 
 
 msg_info "Creating basic FlexGet config.yml"
-mkdir ~/.flexget/
+mkdir /.flexget/
 
-FLEXGET_CONFIG_FILE="~/.flexget/config.yml"
+FLEXGET_CONFIG_FILE="${HOME}/.flexget/config.yml"
 if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
     echo -e "${INFO}${YW} The FlexGet config file already exists so we will not modify it."
 else
     echo -e "${INFO}${YW} The FlexGet config file not found, so downloading a default config.yml from github."
-	curl -fsSL "https://raw.githubusercontent.com/Flexget/Flexget/develop/tests/api_tests/raw_config.yml" -o ~/.flexget/config.yml
+	curl -fsSL "https://raw.githubusercontent.com/Flexget/Flexget/develop/tests/api_tests/raw_config.yml" -o ${HOME}/.flexget/config.yml
 	
 	#verify if we were able to download the test config file
 	if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
 		echo -e "${INFO}${YW} The FlexGet latest test config file was pulled from github."
 	else
 		echo -e "${INFO}${YW} The could not pull test config from github, using a generic one as last resort"
-		cat <<EOF > ~/.flexget/config.yml
+		cat <<EOF > ${HOME}/.flexget/config.yml
 tasks:
   test:
     rss:
