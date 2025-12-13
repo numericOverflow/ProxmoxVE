@@ -13,7 +13,7 @@ setting_up_container
 network_check
 update_os
 
-FLEXGET_PYTHON_VERSION=3.14
+EXPORT FLEXGET_PYTHON_VERSION=3.14
 PYTHON_VERSION="$FLEXGET_PYTHON_VERSION" setup_uv
 
 msg_info "Installing FlexGet (uv-based version)"

@@ -24,7 +24,7 @@ function update_script() {
   check_container_storage
   check_container_resources
 
-  FLEXGET_PYTHON_VERSION=3.14
+  EXPORT FLEXGET_PYTHON_VERSION=3.14
   
 #  if [[ -d /opt/open-webui ]]; then
 #    msg_warn "Legacy installation detected — migrating to uv based install..."
