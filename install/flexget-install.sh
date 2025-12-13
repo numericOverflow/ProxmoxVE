@@ -11,7 +11,8 @@ verb_ip6
 catch_errors
 setting_up_container
 network_check
-update_os
+
+#update_os
 
 msg_info "Setting up uv python"
 PYTHON_VERSION="3.13" setup_uv
@@ -31,7 +32,7 @@ msg_ok "Installed FlexGet"
 #  mkdir -p /tmp/flexget_release_${RELEASE}
 #  curl -fsSL "https://github.com/Flexget/Flexget/releases/download/v${RELEASE}/flexget-${RELEASE}.tar.gz" -o "$temp_file"
 #  tar zxf "$temp_file" --strip-components=1 -C /tmp/flexget_release_${RELEASE}
-#  cp /tmp/flexget_release_${RELEASE}/flexget-${RELEASE}-/ "${HOME}/.flexget/config.yml"
+#  cp /tmp/flexget_release_${RELEASE}/flexget-${RELEASE}-/ /root/.flexget/config.yml
 
 
 
@@ -39,19 +40,19 @@ msg_ok "Installed FlexGet"
 msg_info "Creating basic FlexGet config.yml"
 mkdir /.flexget/
 
-FLEXGET_CONFIG_FILE="${HOME}/.flexget/config.yml"
+FLEXGET_CONFIG_FILE="/root/.flexget/config.yml"
 if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
     echo -e "${INFO}${YW} The FlexGet config file already exists so we will not modify it."
 else
     echo -e "${INFO}${YW} The FlexGet config file not found, so downloading a default config.yml from github."
-	curl -fsSL "https://raw.githubusercontent.com/Flexget/Flexget/develop/tests/api_tests/raw_config.yml" -o "${HOME}/.flexget/config.yml"
+	curl -fsSL "https://raw.githubusercontent.com/Flexget/Flexget/develop/tests/api_tests/raw_config.yml" -o /root/.flexget/config.yml
 	
 	#verify if we were able to download the test config file
 	if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
 		echo -e "${INFO}${YW} The FlexGet latest test config file was pulled from github."
 	else
 		echo -e "${INFO}${YW} The could not pull test config from github, using a generic one as last resort"
-		cat <<EOF > "${HOME}/.flexget/config.yml"
+		cat <<EOF > /root/.flexget/config.yml
 tasks:
   test:
     rss:
@@ -63,8 +64,8 @@ EOF
 fi
 
 
-msg_ok "Created ~/.flexget/config.yml"
-msg_ok "You should edit the ~/.flexget/config.yml to suite your needs"
+msg_ok "Created /root/.flexget/config.yml"
+msg_ok "You should edit /root/.flexget/config.yml to suite your needs"
 
 msg_info "Starting FlexGet daemon"
 flexget daemon start -d --autoreload-config
