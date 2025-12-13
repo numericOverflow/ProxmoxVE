@@ -40,18 +40,29 @@ msg_info "Creating basic FlexGet config.yml"
 mkdir /root/.flexget
 
 FLEXGET_CONFIG_FILE="/root/.flexget/config.yml"
+mkdir -p "$(dirname "${FLEXGET_CONFIG_FILE}")"
+
+# Define a temporary file path
+TEMP_CONFIG_FILE=$(mktemp) 
+
 if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
     echo -e "${INFO}${YW} The FlexGet config file already exists so we will not modify it."
 else
     echo -e "${INFO}${YW} The FlexGet config file not found, so downloading a default config.yml from github."
-	curl -fsSL "https://raw.githubusercontent.com/Flexget/Flexget/develop/tests/api_tests/raw_config.yml" -o /root/.flexget/config.yml
-	
-	#verify if we were able to download the test config file
-	if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
-		echo -e "${INFO}${YW} The FlexGet latest test config file was pulled from github."
-	else
-		echo -e "${INFO}${YW} The could not pull test config from github, using a generic one as last resort"
-		cat <<EOF > /root/.flexget/config.yml
+    
+    # 1. Download to the temporary file
+    curl -fsSL "https://raw.githubusercontent.com/Flexget/Flexget/develop/tests/api_tests/raw_config.yml" -o "${TEMP_CONFIG_FILE}"
+    
+    if [ $? -eq 0 ]; then
+        mkdir -p "$(dirname "${FLEXGET_CONFIG_FILE}")"
+        mv "${TEMP_CONFIG_FILE}" "${FLEXGET_CONFIG_FILE}" 
+        
+        echo -e "${INFO}${YW} The FlexGet latest test config file was pulled from github."
+    else
+        echo -e "${INFO}${YW} Could not pull test config from github, using a generic one as last resort"
+
+        # Write generic config directly to final file (no need for temp file here)
+        cat <<EOF > "${FLEXGET_CONFIG_FILE}"
 tasks:
   test:
     rss:
@@ -59,9 +70,8 @@ tasks:
     mock:
       - title: entry 1
 EOF
-	fi
+    fi
 fi
-
 
 msg_ok "Created /root/.flexget/config.yml"
 msg_ok "You should edit /root/.flexget/config.yml to suite your needs"
@@ -71,8 +81,9 @@ flexget daemon start -d --autoreload-config
 
 
 msg_info "Cleaning up"
-rm -f "${temp_file"}
-rm -f /tmp/flexget_release_${RELEASE}/*
+#rm -f "${temp_file}"
+#rm -f /tmp/flexget_release_${RELEASE}/*
+rm -f "${TEMP_CONFIG_FILE}"
 
 echo -e "${INFO}${YW} FlexGet is configured as Deamon. Use 'schedules' in you config" 
 echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler#period"
