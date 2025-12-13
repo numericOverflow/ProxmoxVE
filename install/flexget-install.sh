@@ -15,42 +15,48 @@ update_os
 
 msg_info "Setting up uv python"
 PYTHON_VERSION="3.13" setup_uv
-export PATH="/root/.local/bin:$PATH"
+#echo 'export PATH=/root/.local/bin:$PATH' >>~/.bashrc
+#export PATH="/root/.local/bin:$PATH"
 msg_ok "Installed uv"
+
+msg_info "Adding flexget bin to PATH"
+[[ ":$PATH:" != *":/root/.local/bin:"* ]] &&
+  echo -e "\nexport PATH=\"/root/.local/bin:\$PATH\"" >>~/.bashrc &&
+  source ~/.bashrc
+msg_ok "PATH updated"
 
 msg_info "Installing FlexGet (uv-based version)"
 $STD uv tool install --python 3.13 flexget[locked,all]
 msg_ok "Installed FlexGet"
 
+msg_info "Creating symlink to config for easy access"
+mkdir /root/.flexget
+ln -s /root/.flexget /root/flexget
+msg_ok "Symlink '/root/flexget' added"
 
-#https://raw.githubusercontent.com/Flexget/Flexget/develop/tests/api_tests/raw_config.yml
-#https://github.com/Flexget/Flexget/releases/download/v${RELEASE}/flexget-${RELEASE}.tar.gz
-
-#  RELEASE=$(curl -fsSL https://api.github.com/repos/Flexget/Flexget/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4) }')
-#  temp_file=$(mktemp)
-#  mkdir -p /tmp/flexget_release_${RELEASE}
-#  curl -fsSL "https://github.com/Flexget/Flexget/releases/download/v${RELEASE}/flexget-${RELEASE}.tar.gz" -o "$temp_file"
-#  tar zxf "$temp_file" --strip-components=1 -C /tmp/flexget_release_${RELEASE}
-#  cp /tmp/flexget_release_${RELEASE}/flexget-${RELEASE}-/ /root/.flexget/config.yml
-
-
-
+msg_info "Setup FlexGet log rotation"
+cat <<EOF > /etc/logrotate.d/flexget-log
+/root/.flexget/flexget.log {
+    daily
+    rotate 30
+    compress
+    missingok
+    notifempty
+    create 0600 root root
+    su root root
+}
+EOF
+msg_ok "Log rotation added"
 
 msg_info "Creating basic FlexGet config.yml"
-mkdir /root/.flexget
-
+TEMP_CONFIG_FILE=$(mktemp) 
 FLEXGET_CONFIG_FILE="/root/.flexget/config.yml"
 mkdir -p "$(dirname "${FLEXGET_CONFIG_FILE}")"
-
-# Define a temporary file path
-TEMP_CONFIG_FILE=$(mktemp) 
 
 if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
     echo -e "${INFO}${YW} The FlexGet config file already exists so we will not modify it."
 else
     echo -e "${INFO}${YW} The FlexGet config file not found, so downloading a default config.yml from github."
-    
-    # 1. Download to the temporary file
     curl -fsSL "https://raw.githubusercontent.com/Flexget/Flexget/develop/tests/api_tests/raw_config.yml" -o "${TEMP_CONFIG_FILE}"
     
     if [ $? -eq 0 ]; then
@@ -77,8 +83,9 @@ msg_ok "Created /root/.flexget/config.yml"
 msg_ok "You should edit /root/.flexget/config.yml to suite your needs"
 
 msg_info "Starting FlexGet daemon"
+echo -e "\n"
 flexget daemon start -d --autoreload-config
-
+echo -e "\n"
 
 msg_info "Cleaning up"
 #rm -f "${temp_file}"
