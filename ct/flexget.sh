@@ -24,68 +24,6 @@ function update_script() {
   check_container_storage
   check_container_resources
  
-#  if [[ -d /opt/open-webui ]]; then
-#    msg_warn "Legacy installation detected — migrating to uv based install..."
-#    msg_info "Stopping Service"
-#    systemctl stop open-webui
-#    msg_ok "Stopped Service"
-#
-#    msg_info "Creating Backup"
-#    mkdir -p /opt/open-webui-backup
-#    cp -a /opt/open-webui/backend/data /opt/open-webui-backup/data || true
-#    cp -a /opt/open-webui/.env /opt/open-webui-backup/.env || true
-#    msg_ok "Created Backup"
-#
-#    msg_info "Removing legacy installation"
-#    rm -rf /opt/open-webui
-#    rm -rf /root/.open-webui || true
-#    msg_ok "Removed legacy installation"
-#
-#    msg_info "Installing uv-based Open-WebUI"
-#    PYTHON_VERSION="3.14" setup_uv
-#    $STD uv tool install --python 3.14 flexget[all]
-#    msg_ok "Installed uv-based Open-WebUI"
-#
-#    msg_info "Restoring data"
-#    mkdir -p /root/.open-webui
-#    cp -a /opt/open-webui-backup/data/* /root/.open-webui/ || true
-#    cp -a /opt/open-webui-backup/.env /root/.env || true
-#    rm -rf /opt/open-webui-backup || true
-#    msg_ok "Restored data"
-#
-#    msg_info "Recreating Service"
-#    cat <<EOF >/etc/systemd/system/open-webui.service
-#[Unit]
-#Description=Open WebUI Service
-#After=network.target
-#
-#[Service]
-#Type=simple
-#Environment=DATA_DIR=/root/.open-webui
-#EnvironmentFile=-/root/.env
-#ExecStart=/root/.local/bin/open-webui serve
-#WorkingDirectory=/root
-#Restart=on-failure
-#RestartSec=5
-#User=root
-#
-#[Install]
-#WantedBy=multi-user.target
-#EOF
-#
-#    $STD systemctl daemon-reload
-#    systemctl enable -q --now open-webui
-#    msg_ok "Recreated Service"
-#
-#    msg_ok "Migration completed"
-#    exit 0
-#  fi
-
-#  if [[ ! -d /root/.open-webui ]]; then
-#    msg_error "No ${APP} Installation Found!"
-#    exit
-#  fi
-
   msg_info "Stop existing Flexget daemon (if exists)"
   # The [f]lexget trick prevents the grep command from matching itself
   if ps aux | grep "[f]lexget" > /dev/null; then
