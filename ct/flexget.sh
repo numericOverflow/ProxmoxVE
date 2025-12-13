@@ -24,7 +24,7 @@ function update_script() {
   check_container_storage
   check_container_resources
 
-  export FLEXGET_PYTHON_VERSION=3.14
+  #export FLEXGET_PYTHON_VERSION=3.14
   
 #  if [[ -d /opt/open-webui ]]; then
 #    msg_warn "Legacy installation detected — migrating to uv based install..."
@@ -44,8 +44,8 @@ function update_script() {
 #    msg_ok "Removed legacy installation"
 #
 #    msg_info "Installing uv-based Open-WebUI"
-#    PYTHON_VERSION="$FLEXGET_PYTHON_VERSION" setup_uv
-#    $STD uv tool install --python $FLEXGET_PYTHON_VERSION flexget[all]
+#    PYTHON_VERSION="3.14" setup_uv
+#    $STD uv tool install --python 3.14 flexget[all]
 #    msg_ok "Installed uv-based Open-WebUI"
 #
 #    msg_info "Restoring data"
@@ -89,8 +89,8 @@ function update_script() {
 #  fi
 
   msg_info "Updating FlexGet (uv-based version)"
-  PYTHON_VERSION="$FLEXGET_PYTHON_VERSION" setup_uv
-  $STD uv tool upgrade --python $FLEXGET_PYTHON_VERSION flexget[all]
+  PYTHON_VERSION="3.14" setup_uv
+  $STD uv tool upgrade --python 3.14 flexget[all]
   #systemctl restart open-webui
   msg_ok "Updated FlexGet"
   msg_ok "Updated successfully!"
