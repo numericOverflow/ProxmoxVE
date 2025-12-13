@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
+source <(curl -fsSL https://raw.githubusercontent.com/numericOverflow/ProxmoxVE/flexget/misc/build.func)
 # Copyright (c) 2021-2025 tteck
 # Author: tteck (tteckster)
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://www.bazarr.media/
 
 APP="Bazarr"
-var_tags="${var_tags:-arr}"
+var_tags="${var_tags:-arr;usenet;downloader}"
 var_cpu="${var_cpu:-2}"
 var_ram="${var_ram:-1024}"
 var_disk="${var_disk:-4}"
