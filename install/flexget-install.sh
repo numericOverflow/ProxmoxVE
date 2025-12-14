@@ -58,7 +58,7 @@ msg_ok "Log rotation added"
 
 echo -e "${INFO}${YW} Generating FlexGet default HTTPS certificates${CL}"
 if [ ! -f /etc/flexget/ssl/flexget.pem ] || [ ! -f /etc/flexget/ssl/flexget.key ]; then
-  $STD openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -subj "/O=Flexget Web-UI/OU=Dummy Certificate/CN=localhost" -keyout /etc/flexget/ssl/flexget.pem -out /etc/flexget/ssl/flexget.key
+  $STD openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -subj "/O=Flexget Web-UI/OU=Dummy Certificate/CN=localhost" -keyout /etc/flexget/ssl/flexget.key -out /etc/flexget/ssl/flexget.pem
   chmod 600 /etc/flexget/ssl/flexget.pem
   chmod 600 /etc/flexget/ssl/flexget.key
 fi
@@ -114,11 +114,11 @@ if [[ ${prompt,,} =~ ^(y|yes)$ ]]; then
     {
     cat <<'EOF'
 web_server:
-bind: 0.0.0.0
-port: 5050
-ssl_certificate: '/etc/flexget/ssl/flexget.pem'
-ssl_private_key: '/etc/flexget/ssl/flexget.key'
-web_ui: yes
+  bind: 0.0.0.0
+  port: 5050
+  ssl_certificate: '/etc/flexget/ssl/flexget.pem'
+  ssl_private_key: '/etc/flexget/ssl/flexget.key'
+  web_ui: yes
 
 EOF
     cat "${FLEXGET_CONFIG_FILE}"
