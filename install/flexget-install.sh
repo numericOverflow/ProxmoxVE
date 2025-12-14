@@ -105,7 +105,7 @@ fi
 if [ "${enable_webui}" = "1" ]; then
   echo -e "${INFO}${YW} Configuring FlexGet Web-UI${CL}"
   
-GEN_PWD=$(head -c128 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^*_+~' | cut -c 1-12)
+  GEN_PWD=$(head -c128 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^*_+~' | cut -c 1-12)
 
   if command -v whiptail >/dev/null 2>&1; then
       
