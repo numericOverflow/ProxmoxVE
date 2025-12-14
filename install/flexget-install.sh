@@ -177,6 +177,8 @@ echo -e "${INFO}${YW} Created FlexGet config file is located at '/etc/flexget/co
 echo -e "${INFO}${YW} FlexGet is configured as Daemon. Use 'schedules' in your config${CL}"
 echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler${CL}"
 
+msg_ok "To update Flexget Web-UI password in the future, use `flexget web passwd NeW-sTrOnG-pAsSwOrD_hErE12@!`"
+
 motd_ssh
 customize
 cleanup_lxc
