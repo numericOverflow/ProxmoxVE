@@ -122,7 +122,7 @@ if [ "${enable_webui}" = "1" ]; then
       FLEXGET_PWD="${FLEXGET_PWD:-$GEN_PWD}"
   fi
 
-  flexget web passwd "${FLEXGET_PWD}"
+  $STD /root/.local/bin/flexget web passwd "${FLEXGET_PWD}"
   msg_ok "Web-UI password set"
 
   if grep -q '^web_server:' "${FLEXGET_CONFIG_FILE}"; then
