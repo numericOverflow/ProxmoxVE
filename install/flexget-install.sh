@@ -13,6 +13,9 @@ setting_up_container
 network_check
 update_os
 
+echo -e "FUNCTIONS_FILE_PATH:"
+echo -e "$FUNCTIONS_FILE_PATH"
+
 msg_info "Setting up uv python"
 PYTHON_VERSION="3.13" setup_uv
 #echo 'export PATH=/root/.local/bin:$PATH' >>~/.bashrc
@@ -25,13 +28,14 @@ msg_info "Adding flexget bin to PATH"
   source ~/.bashrc
 msg_ok "PATH updated"
 
-msg_info "Creating cofing directory"
-mkdir /etc/flexget
-msg_ok "Created /etc/flexget"
+msg_info "Creating cofing directoryies"
+mkdir -p /etc/flexget
+mkdir -p /etc/flexget/ssl/
+msg_ok "Created directories"
 
 msg_info "Creating symlinks to config for easy access"
-ln -s /root/.flexget /etc/flexget
-ln -s /root/flexget /etc/flexget
+ln -s /etc/flexget /root/.flexget
+ln -s /etc/flexget /root/flexget
 msg_ok "Symlink '/root/flexget' added"
 
 msg_info "Installing FlexGet (uv-based version)"
@@ -52,6 +56,14 @@ cat <<EOF > /etc/logrotate.d/flexget-log
 EOF
 msg_ok "Log rotation added"
 
+echo -e "${INFO}${YW} Generating FlexGet default HTTPS certificates${CL}"
+if [ ! -f /etc/flexget/ssl/flexget.pem ] || [ ! -f /etc/flexget/ssl/flexget.key ]; then
+  $STD openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -subj "/O=Flexget Web-UI/OU=Dummy Certificate/CN=localhost" -keyout /etc/flexget/ssl/flexget.pem -out /etc/flexget/ssl/flexget.key
+  chmod 600 /etc/flexget/ssl/flexget.pem
+  chmod 600 /etc/flexget/ssl/flexget.key
+fi
+msg_ok "Certs created"  
+
 msg_info "Creating basic FlexGet config.yml"
 TEMP_CONFIG_FILE=$(mktemp) 
 FLEXGET_CONFIG_FILE="/etc/flexget/config.yml"
@@ -60,19 +72,16 @@ mkdir -p "$(dirname "${FLEXGET_CONFIG_FILE}")"
 if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
     echo -e "${INFO}${YW} The FlexGet config file already exists so we will not modify it.${CL}"
 else
-    echo -e "${INFO}${YW} The FlexGet config file not found, so downloading a default config.yml from github.${CL}"
-    curl -fsSL "https://raw.githubusercontent.com/Flexget/Flexget/develop/tests/api_tests/raw_config.yml" -o "${TEMP_CONFIG_FILE}"
-    
-    if [ $? -eq 0 ]; then
-        mkdir -p "$(dirname "${FLEXGET_CONFIG_FILE}")"
-        mv "${TEMP_CONFIG_FILE}" "${FLEXGET_CONFIG_FILE}" 
-        
-        echo -e "${INFO}${YW} The FlexGet latest test config file was pulled from github.${CL}"
-    else
-        echo -e "${INFO}${YW} Could not pull test config from github, using a generic one as last resort${CL}"
-
-        # Write generic config directly to final file (no need for temp file here)
-        cat <<EOF > "${FLEXGET_CONFIG_FILE}"
+	# Write generic config directly to final file (no need for temp file here)
+	cat <<EOF > "${FLEXGET_CONFIG_FILE}"
+#https://flexget.com/Plugins/Daemon/scheduler
+schedules:
+  #Run every task once an hour
+  - tasks: '*'
+    interval:
+      hours: 1
+	  
+#Basic task structure - configure this
 tasks:
   test:
     rss:
@@ -80,11 +89,47 @@ tasks:
     mock:
       - title: entry 1
 EOF
-    fi
 fi
+msg_ok "Created FlexGet config file located at '/etc/flexget/config.yml'"
 
-msg_ok "Created /etc/flexget/config.yml"
-msg_ok "You should edit /etc/flexget/config.yml to suite your needs"
+msg_ok "https://flexget.com/en/Web-UI"
+read -r -p "${TAB3}Would you like to enable the FlexGet Web-UI now? <y/N>" prompt
+if [[ ${prompt,,} =~ ^(y|yes)$ ]]; then
+
+  echo -e "${INFO}${YW} Configuring FlexGet Web-UI${CL}"
+  
+  GEN_PWD=$(head -c128 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^*_+~' | cut -c 1-12)
+  read -r -p "${TAB3}Please enter the web-ui password [${GEN_PWD}]:" FLEXGET_PWD
+  FLEXGET_PWD=${FLEXGET_PWD:-$GEN_PWD}
+
+  #@TODO: REEANABLE:    
+  #$STD flexget web passwd ${FLEXGET_PWD}
+  flexget web passwd ${FLEXGET_PWD}
+  msg_ok "Web-UI password set"
+
+  if grep -q '^web_server:' "${FLEXGET_CONFIG_FILE}"; then
+    msg_ok "Web server config already present. Skipping."
+  else
+    TEMP_WEBGUI_ENABLE=$(mktemp)
+    {
+    cat <<'EOF'
+web_server:
+bind: 0.0.0.0
+port: 5050
+ssl_certificate: '/etc/flexget/ssl/flexget.pem'
+ssl_private_key: '/etc/flexget/ssl/flexget.key'
+web_ui: yes
+
+EOF
+    cat "${FLEXGET_CONFIG_FILE}"
+    } > "$TEMP_WEBGUI_ENABLE" && \
+    cp -fp "$TEMP_WEBGUI_ENABLE" "${FLEXGET_CONFIG_FILE}"
+    msg_ok "Web-UI config added to file."
+  fi
+  msg_ok "Web-UI config complete"
+else
+  echo -e "${INFO}${YW} FlexGet Web-UI config skipped${CL}"
+fi
 
 #echo -e "${INFO}${YW} Starting FlexGet daemon${CL}"
 #flexget daemon start -d --autoreload-config
@@ -116,14 +161,15 @@ systemctl enable -q --now flexget
 echo -e ""
 msg_ok "Started FlexGet"
 
-
 msg_info "Cleaning up"
 #rm -f "${temp_file}"
 #rm -f /tmp/flexget_release_${RELEASE}/*
 rm -f "${TEMP_CONFIG_FILE}"
+rm -f "${TEMP_WEBGUI_ENABLE}"
 
-echo -e "${INFO}${YW} FlexGet is configured as Deamon. Use 'schedules' in you config${CL}" 
-echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler#period${CL}"
+echo -e "${INFO}${YW} Created FlexGet config file is located at '/etc/flexget/config.yml'${CL}" 
+echo -e "${INFO}${YW} FlexGet is configured as Deamon. Use 'schedules' in you config${CL}"
+echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler${CL}"
 
 motd_ssh
 customize
