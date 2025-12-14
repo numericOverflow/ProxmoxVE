@@ -42,6 +42,7 @@ function update_script() {
   msg_ok "Updated FlexGet"
   
   msg_info "Starting FlexGet daemon"
+  echo ""
   flexget daemon start -d --autoreload-config
   msg_ok "Updated successfully!"
   exit
