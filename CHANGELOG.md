@@ -10,6 +10,36 @@
 > [!CAUTION]
 Exercise vigilance regarding copycat or coat-tailing sites that seek to exploit the project's popularity for potentially malicious purposes.
 
+## 2025-12-14
+
+## 2025-12-13
+
+### 🚀 Updated Scripts
+
+  - #### 🐞 Bug Fixes
+
+    - Umami: Use `pnpm` [@tremor021](https://github.com/tremor021) ([#9937](https://github.com/community-scripts/ProxmoxVE/pull/9937))
+    - Tunarr: Switch to prebuild archive [@tremor021](https://github.com/tremor021) ([#9920](https://github.com/community-scripts/ProxmoxVE/pull/9920))
+    - [HOTFIX] NetVisor: backup OIDC config before update [@vhsdream](https://github.com/vhsdream) ([#9895](https://github.com/community-scripts/ProxmoxVE/pull/9895))
+    - Update OPNsense download URL to version 14.3 [@jaredcarling42-design](https://github.com/jaredcarling42-design) ([#9899](https://github.com/community-scripts/ProxmoxVE/pull/9899))
+
+  - #### ✨ New Features
+
+    - Add optional TLS setup to Valkey installer [@pshankinclarke](https://github.com/pshankinclarke) ([#9789](https://github.com/community-scripts/ProxmoxVE/pull/9789))
+
+  - #### 🔧 Refactor
+
+    - Refactor: Spoolman [@tremor021](https://github.com/tremor021) ([#9873](https://github.com/community-scripts/ProxmoxVE/pull/9873))
+
+### 🧰 Tools
+
+  - AdGuardHome-Sync ([#9783](https://github.com/community-scripts/ProxmoxVE/pull/9783))
+
+### ❔ Uncategorized
+
+  - Update category value in glance.json and adguard-home.json [@Bensonheimer992](https://github.com/Bensonheimer992) ([#9932](https://github.com/community-scripts/ProxmoxVE/pull/9932))
+- Change category ID from 6 to 3 in coolify.json and dokploy.json [@Bensonheimer992](https://github.com/Bensonheimer992) ([#9930](https://github.com/community-scripts/ProxmoxVE/pull/9930))
+
 ## 2025-12-12
 
 ### 🆕 New Scripts
