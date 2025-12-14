@@ -6,7 +6,7 @@
 # Source: https://flexget.com/
 
 source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
-#source <(curl -fsSL https://git.community-scripts.org/numericOverflow/ProxmoxVE/raw/flexget/main/misc/build.func)
+#source <(curl -fsSL https://raw.githubusercontent.com/numericOverflow/ProxmoxVE/flexget/misc/build.func)
 
 color
 verb_ip6
@@ -185,7 +185,7 @@ echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler${CL}"
 
 msg_info "You Flexget Web-UI password is:  ${FLEXGET_PWD}"
 msg_info "Be sure to save this somewhere safe"
-msg_info "To update Flexget Web-UI password in the future, use `flexget web passwd NeW-sTrOnG-pAsSwOrD_hErE12@!`"
+msg_info "To update Flexget Web-UI password in the future, use 'flexget web passwd NeW-sTrOnG-pAsSwOrD_hErE12@!'"
 
 motd_ssh
 customize
