@@ -105,15 +105,21 @@ fi
 if [ "${enable_webui}" = "1" ]; then
   echo -e "${INFO}${YW} Configuring FlexGet Web-UI${CL}"
   
-  GEN_PWD=$(head -c128 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^*_+~' | cut -c 1-12)
+GEN_PWD=$(head -c128 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^*_+~' | cut -c 1-12)
+
   if command -v whiptail >/dev/null 2>&1; then
-    PWD_OUT=$(whiptail --inputbox "Please enter the web-ui password (leave blank to generate):" 8 60 "${GEN_PWD}" 3>&1 1>&2 2>&3)
-    if [ $? -eq 0 ]; then
-      FLEXGET_PWD="${PWD_OUT}"
-      [ -z "${FLEXGET_PWD}" ] && FLEXGET_PWD="${GEN_PWD}"
-    else
-      FLEXGET_PWD="${GEN_PWD}"
-    fi
+      
+      PWD_OUT=$(whiptail --inputbox "Please enter the web-ui password (leave blank to generate):" 8 60 "${GEN_PWD}" 3>&1 1>&2 2>&3)
+      WHIPTAIL_STATUS=$?
+  
+      if [ ${WHIPTAIL_STATUS} -eq 0 ]; then
+          FLEXGET_PWD="${PWD_OUT:-$GEN_PWD}"
+      else
+          FLEXGET_PWD="${GEN_PWD}"
+      fi
+  else
+      read -r -p "${TAB3}Please enter the web-ui password [${GEN_PWD}]:" FLEXGET_PWD
+      FLEXGET_PWD="${FLEXGET_PWD:-$GEN_PWD}"
   fi
 
   flexget web passwd "${FLEXGET_PWD}"
@@ -177,7 +183,9 @@ echo -e "${INFO}${YW} Created FlexGet config file is located at '/etc/flexget/co
 echo -e "${INFO}${YW} FlexGet is configured as Daemon. Use 'schedules' in your config${CL}"
 echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler${CL}"
 
-msg_ok "To update Flexget Web-UI password in the future, use `flexget web passwd NeW-sTrOnG-pAsSwOrD_hErE12@!`"
+msg_info "You Flexget Web-UI password is:  ${FLEXGET_PWD}"
+msg_info "Be sure to save this somewhere safe"
+msg_info "To update Flexget Web-UI password in the future, use `flexget web passwd NeW-sTrOnG-pAsSwOrD_hErE12@!`"
 
 motd_ssh
 customize
