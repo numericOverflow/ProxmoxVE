@@ -145,6 +145,8 @@ Description=Flexget Daemon
 After=network.target
 
 [Service]
+Restart=on-failure
+RestartSec=5s
 Type=simple
 User=root
 Group=root

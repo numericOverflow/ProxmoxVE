@@ -23,47 +23,22 @@ function update_script() {
   header_info
   check_container_storage
   check_container_resources
- 
-  msg_ok "Stop existing Flexget daemon (if exists)"
-  
-  TIMEOUT=90
-  SLEEP_INTERVAL=2  
-  if pgrep -fi "${APP}" > /dev/null; then
-      echo -e "${INFO}${YW} ${APP} is running, attempting graceful stop..."
-	  flexget daemon stop
-	  echo -e ""
-      msg_info "Waiting up to ${TIMEOUT}s for ${APP} to stop..."
-      
-      END_TIME=$(( $(date +%s) + TIMEOUT ))
-      until ! pgrep -fi "${APP}" > /dev/null || [ $(date +%s) -ge $END_TIME ]; do
-          sleep $SLEEP_INTERVAL
-      done
-  
-      # Final status check and kill if still exists
-      if pgrep -fi "${APP}" > /dev/null; then
-          msg_info "Graceful stop failed. Killing ${APP}..."
-          pkill -9 -f -i "${APP}"
 
-          if ! pgrep -fi "${APP}" > /dev/null; then
-              msg_ok "${APP} force-killed successfully."
-          else
-              msg_error "FATAL ERROR: Failed to kill ${APP} process."
-              exit 1
-          fi
-      else
-          msg_ok "${APP} stopped successfully."
-      fi
-  else
-      msg_ok "${APP} is NOT running."
+  if [[ ! -d /opt/snipe-it ]]; then
+    msg_error "No ${APP} Installation Found!"
+    exit
   fi
   
+  msg_info "Stop existing Flexget daemon (if exists)"
+  systemctl stop flexget
+  msg_ok "Started FlexGet"
+
   msg_info "Updating uv python"
   PYTHON_VERSION="3.13" setup_uv
   msg_ok "Updated uv"
 
   msg_info "Updating FlexGet (uv-based version)"
-  #$STD uv tool upgrade --python 3.13 flexget[locked,all]
-  #systemctl restart open-webui
+  $STD uv tool upgrade --python 3.13 flexget[locked,all]
   msg_ok "Updated FlexGet"
   
   echo -e "${INFO}${YW} Starting FlexGet daemon${CL}"
