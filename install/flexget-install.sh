@@ -5,7 +5,9 @@
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://flexget.com/
 
-source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
+#source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
+source <(curl -fsSL https://git.community-scripts.org/numericOverflow/ProxmoxVE/raw/flexget/main/misc/build.func)
+
 color
 verb_ip6
 catch_errors
@@ -16,7 +18,7 @@ update_os
 echo -e "FUNCTIONS_FILE_PATH:"
 echo -e "$FUNCTIONS_FILE_PATH"
 
-msg_info "Setting up uv python"
+msg_info "Setting up uv Python"
 PYTHON_VERSION="3.13" setup_uv
 #echo 'export PATH=/root/.local/bin:$PATH' >>~/.bashrc
 #export PATH="/root/.local/bin:$PATH"
@@ -28,7 +30,7 @@ msg_info "Adding flexget bin to PATH"
   source ~/.bashrc
 msg_ok "PATH updated"
 
-msg_info "Creating cofing directoryies"
+msg_info "Creating config directories"
 mkdir -p /etc/flexget
 mkdir -p /etc/flexget/ssl/
 msg_ok "Created directories"
@@ -102,7 +104,7 @@ if [[ ${prompt,,} =~ ^(y|yes)$ ]]; then
   read -r -p "${TAB3}Please enter the web-ui password [${GEN_PWD}]:" FLEXGET_PWD
   FLEXGET_PWD=${FLEXGET_PWD:-$GEN_PWD}
 
-  #@TODO: REEANABLE:    
+  #@TODO: RE-ENABLE:
   #$STD flexget web passwd ${FLEXGET_PWD}
   flexget web passwd ${FLEXGET_PWD}
   msg_ok "Web-UI password set"
@@ -168,7 +170,7 @@ rm -f "${TEMP_CONFIG_FILE}"
 rm -f "${TEMP_WEBGUI_ENABLE}"
 
 echo -e "${INFO}${YW} Created FlexGet config file is located at '/etc/flexget/config.yml'${CL}" 
-echo -e "${INFO}${YW} FlexGet is configured as Deamon. Use 'schedules' in you config${CL}"
+echo -e "${INFO}${YW} FlexGet is configured as Daemon. Use 'schedules' in your config${CL}"
 echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler${CL}"
 
 motd_ssh
