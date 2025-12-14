@@ -82,10 +82,10 @@ fi
 msg_ok "Created /root/.flexget/config.yml"
 msg_ok "You should edit /root/.flexget/config.yml to suite your needs"
 
-msg_info "Starting FlexGet daemon"
-echo -e "\n"
+echo -e "${INFO}${YW} Starting FlexGet daemon${CL}"
 flexget daemon start -d --autoreload-config
-echo -e "\n"
+echo -e ""
+msg_ok "Started FlexGet"
 
 msg_info "Cleaning up"
 #rm -f "${temp_file}"

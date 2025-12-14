@@ -24,13 +24,14 @@ function update_script() {
   check_container_storage
   check_container_resources
  
-  msg_info "Stop existing Flexget daemon (if exists)"
+  msg_ok "Stop existing Flexget daemon (if exists)"
+  
   TIMEOUT=60
   SLEEP_INTERVAL=2  
-  # Check if FlexGet process is running
   if pgrep -fi "${APP}" > /dev/null; then
-      msg_info "${APP} is running, attempting graceful stop..."
-      flexget daemon stop
+      echo -e "${INFO}${YW} ${APP} is running, attempting graceful stop..."
+	  flexget daemon stop
+	  echo -e ""
       msg_info "Waiting up to ${TIMEOUT}s for ${APP} to stop..."
       
       END_TIME=$(( $(date +%s) + TIMEOUT ))
@@ -65,11 +66,9 @@ function update_script() {
   #systemctl restart open-webui
   msg_ok "Updated FlexGet"
   
-  msg_info "Starting FlexGet daemon"
-  echo -e "\n"
+  echo -e "${INFO}${YW} Starting FlexGet daemon${CL}"
   flexget daemon start -d --autoreload-config
-  echo -e "\n"
-
+  echo -e ""
   msg_ok "Updated successfully!"
   exit
 }
