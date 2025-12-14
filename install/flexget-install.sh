@@ -105,7 +105,7 @@ fi
 if [ "${enable_webui}" = "1" ]; then
   echo -e "${INFO}${YW} Configuring FlexGet Web-UI${CL}"
   
-  GEN_PWD=$(head -c128 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^*_+~' | cut -c 1-12)
+  GEN_PWD=$(openssl rand -base64 99 | tr -dc 'a-zA-Z0-9' | head -c16)
 
   if command -v whiptail >/dev/null 2>&1; then
       
@@ -122,7 +122,7 @@ if [ "${enable_webui}" = "1" ]; then
       FLEXGET_PWD="${FLEXGET_PWD:-$GEN_PWD}"
   fi
 
-  $STD /root/.local/bin/flexget web passwd "${FLEXGET_PWD}"
+  # $STD /root/.local/bin/flexget web passwd "${FLEXGET_PWD}"
   msg_ok "Web-UI password set"
 
   if grep -q '^web_server:' "${FLEXGET_CONFIG_FILE}"; then
