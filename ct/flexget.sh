@@ -41,9 +41,8 @@ function update_script() {
   $STD uv tool upgrade --python 3.13 flexget[locked,all]
   msg_ok "Updated FlexGet"
   
-  echo -e "${INFO}${YW} Starting FlexGet daemon${CL}"
+  msg_info "Starting FlexGet daemon"
   flexget daemon start -d --autoreload-config
-  echo -e ""
   msg_ok "Updated successfully!"
   exit
 }
