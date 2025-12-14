@@ -26,7 +26,7 @@ function update_script() {
  
   msg_ok "Stop existing Flexget daemon (if exists)"
   
-  TIMEOUT=60
+  TIMEOUT=90
   SLEEP_INTERVAL=2  
   if pgrep -fi "${APP}" > /dev/null; then
       echo -e "${INFO}${YW} ${APP} is running, attempting graceful stop..."
