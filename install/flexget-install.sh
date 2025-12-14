@@ -25,7 +25,7 @@ PYTHON_VERSION="3.13" setup_uv
 msg_ok "Installed uv"
 
 msg_info "Adding flexget bin to PATH"
-[[ ":$PATH:" != *":/root/.local/bin:"* ]] &&
+[[ ":${PATH}:" != *":/root/.local/bin:"* ]] &&
   echo -e "\nexport PATH=\"/root/.local/bin:\$PATH\"" >>~/.bashrc &&
   source ~/.bashrc
 msg_ok "PATH updated"
@@ -96,17 +96,17 @@ msg_ok "Created FlexGet config file located at '/etc/flexget/config.yml'"
 
 msg_ok "https://flexget.com/en/Web-UI"
 read -r -p "${TAB3}Would you like to enable the FlexGet Web-UI now? <y/N>" prompt
-if [[ ${prompt,,} =~ ^(y|yes)$ ]]; then
+if [[ "${prompt,,}" =~ ^(y|yes)$ ]]; then
 
   echo -e "${INFO}${YW} Configuring FlexGet Web-UI${CL}"
   
   GEN_PWD=$(head -c128 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^*_+~' | cut -c 1-12)
   read -r -p "${TAB3}Please enter the web-ui password [${GEN_PWD}]:" FLEXGET_PWD
-  FLEXGET_PWD=${FLEXGET_PWD:-$GEN_PWD}
+  FLEXGET_PWD=${FLEXGET_PWD:-"$GEN_PWD"}
 
   #@TODO: RE-ENABLE:
-  #$STD flexget web passwd ${FLEXGET_PWD}
-  flexget web passwd ${FLEXGET_PWD}
+  #$STD flexget web passwd "${FLEXGET_PWD}"
+  flexget web passwd "${FLEXGET_PWD}"
   msg_ok "Web-UI password set"
 
   if grep -q '^web_server:' "${FLEXGET_CONFIG_FILE}"; then
