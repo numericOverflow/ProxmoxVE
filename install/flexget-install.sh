@@ -178,8 +178,8 @@ apt-get -y autoclean
 msg_ok "Cleanup complete"
 
 echo -e "${INFO}${YW} Created FlexGet config file is located at '/etc/flexget/config.yml'${CL}" 
-echo -e "${INFO}${YW} FlexGet is configured as Daemon. Use 'schedules' in your config${CL}"
-echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler${CL}"
+echo -e "${INFO}${YW} FlexGet is configured as Daemon. Use 'schedules' plugin in your config${CL}"
+echo -e "${INFO}${YW}     See: https://flexget.com/Plugins/Daemon/scheduler${CL}"
 
 echo -e "${INFO}${YW} You Flexget Web-UI password is:  ${FLEXGET_PWD}${CL}"
 echo -e "${INFO}${YW} Be sure to save this somewhere safe${CL}"
