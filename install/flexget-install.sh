@@ -94,60 +94,60 @@ EOF
 fi
 msg_ok "Created FlexGet config file located at '/etc/flexget/config.yml'"
 
-if command -v whiptail >/dev/null 2>&1; then
-  if whiptail --title "FlexGet Web-UI" --yesno "Would you like to enable the FlexGet Web-UI now?" 8 60; then
-    enable_webui=1
-  else
-    enable_webui=0
-  fi
-fi
-
-if [ "${enable_webui}" = "1" ]; then
-  echo -e "${INFO}${YW} Configuring FlexGet Web-UI${CL}"
-  
-  GEN_PWD=$(openssl rand -base64 99 | tr -dc 'a-zA-Z0-9' | head -c16)
-
-  if command -v whiptail >/dev/null 2>&1; then
-      
-      PWD_OUT=$(whiptail --inputbox "Please enter the web-ui password (leave blank to generate):" 8 60 "${GEN_PWD}" 3>&1 1>&2 2>&3)
-      WHIPTAIL_STATUS=$?
-  
-      if [ ${WHIPTAIL_STATUS} -eq 0 ]; then
-          FLEXGET_PWD="${PWD_OUT:-$GEN_PWD}"
-      else
-          FLEXGET_PWD="${GEN_PWD}"
-      fi
-  else
-      read -r -p "${TAB3}Please enter the web-ui password [${GEN_PWD}]:" FLEXGET_PWD
-      FLEXGET_PWD="${FLEXGET_PWD:-$GEN_PWD}"
-  fi
-
-  # $STD /root/.local/bin/flexget web passwd "${FLEXGET_PWD}"
-  msg_ok "Web-UI password set"
-
-  if grep -q '^web_server:' "${FLEXGET_CONFIG_FILE}"; then
-    msg_ok "Web server config already present. Skipping."
-  else
-    TEMP_WEBGUI_ENABLE=$(mktemp)
-    {
-    cat <<'EOF'
-web_server:
-  bind: 0.0.0.0
-  port: 5050
-  ssl_certificate: '/etc/flexget/ssl/flexget.pem'
-  ssl_private_key: '/etc/flexget/ssl/flexget.key'
-  web_ui: yes
-
-EOF
-    cat "${FLEXGET_CONFIG_FILE}"
-    } > "$TEMP_WEBGUI_ENABLE" && \
-    cp -fp "$TEMP_WEBGUI_ENABLE" "${FLEXGET_CONFIG_FILE}"
-    msg_ok "Web-UI config added to file."
-  fi
-  msg_ok "Web-UI config complete"
-else
-  echo -e "${INFO}${YW} FlexGet Web-UI config skipped${CL}"
-fi
+#if command -v whiptail >/dev/null 2>&1; then
+#  if whiptail --title "FlexGet Web-UI" --yesno "Would you like to enable the FlexGet Web-UI now?" 8 60; then
+#    enable_webui=1
+#  else
+#    enable_webui=0
+#  fi
+#fi
+#
+#if [ "${enable_webui}" = "1" ]; then
+#  echo -e "${INFO}${YW} Configuring FlexGet Web-UI${CL}"
+#  
+#  GEN_PWD=$(openssl rand -base64 99 | tr -dc 'a-zA-Z0-9' | head -c16)
+#
+#  if command -v whiptail >/dev/null 2>&1; then
+#      
+#      PWD_OUT=$(whiptail --inputbox "Please enter the web-ui password (leave blank to generate):" 8 60 "${GEN_PWD}" 3>&1 1>&2 2>&3)
+#      WHIPTAIL_STATUS=$?
+#  
+#      if [ ${WHIPTAIL_STATUS} -eq 0 ]; then
+#          FLEXGET_PWD="${PWD_OUT:-$GEN_PWD}"
+#      else
+#          FLEXGET_PWD="${GEN_PWD}"
+#      fi
+#  else
+#      read -r -p "${TAB3}Please enter the web-ui password [${GEN_PWD}]:" FLEXGET_PWD
+#      FLEXGET_PWD="${FLEXGET_PWD:-$GEN_PWD}"
+#  fi
+#
+#  # $STD /root/.local/bin/flexget web passwd "${FLEXGET_PWD}"
+#  msg_ok "Web-UI password set"
+#
+#  if grep -q '^web_server:' "${FLEXGET_CONFIG_FILE}"; then
+#    msg_ok "Web server config already present. Skipping."
+#  else
+#    TEMP_WEBGUI_ENABLE=$(mktemp)
+#    {
+#    cat <<'EOF'
+#web_server:
+#  bind: 0.0.0.0
+#  port: 5050
+#  ssl_certificate: '/etc/flexget/ssl/flexget.pem'
+#  ssl_private_key: '/etc/flexget/ssl/flexget.key'
+#  web_ui: yes
+#
+#EOF
+#    cat "${FLEXGET_CONFIG_FILE}"
+#    } > "$TEMP_WEBGUI_ENABLE" && \
+#    cp -fp "$TEMP_WEBGUI_ENABLE" "${FLEXGET_CONFIG_FILE}"
+#    msg_ok "Web-UI config added to file."
+#  fi
+#  msg_ok "Web-UI config complete"
+#else
+#  echo -e "${INFO}${YW} FlexGet Web-UI config skipped${CL}"
+#fi
 
 msg_info "Setup flexget to run at startup"
 cat <<EOF >/etc/systemd/system/flexget.service
