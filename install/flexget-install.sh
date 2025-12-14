@@ -94,19 +94,29 @@ EOF
 fi
 msg_ok "Created FlexGet config file located at '/etc/flexget/config.yml'"
 
-msg_ok "https://flexget.com/en/Web-UI"
-read -r -p "${TAB3}Would you like to enable the FlexGet Web-UI now? <y/N>" prompt
-if [[ "${prompt,,}" =~ ^(y|yes)$ ]]; then
+if command -v whiptail >/dev/null 2>&1; then
+  if whiptail --title "FlexGet Web-UI" --yesno "Would you like to enable the FlexGet Web-UI now?" 8 60; then
+    enable_webui=1
+  else
+    enable_webui=0
+  fi
+fi
 
+if [ "${enable_webui}" = "1" ]; then
   echo -e "${INFO}${YW} Configuring FlexGet Web-UI${CL}"
   
   GEN_PWD=$(head -c128 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^*_+~' | cut -c 1-12)
-  read -r -p "${TAB3}Please enter the web-ui password [${GEN_PWD}]:" FLEXGET_PWD
-  FLEXGET_PWD=${FLEXGET_PWD:-"$GEN_PWD"}
+  if command -v whiptail >/dev/null 2>&1; then
+    PWD_OUT=$(whiptail --inputbox "Please enter the web-ui password (leave blank to generate):" 8 60 "${GEN_PWD}" 3>&1 1>&2 2>&3)
+    if [ $? -eq 0 ]; then
+      FLEXGET_PWD="${PWD_OUT}"
+      [ -z "${FLEXGET_PWD}" ] && FLEXGET_PWD="${GEN_PWD}"
+    else
+      FLEXGET_PWD="${GEN_PWD}"
+    fi
+  fi
 
-  #@TODO: RE-ENABLE:
-  #$STD flexget web passwd "${FLEXGET_PWD}"
-  flexget web passwd "${FLEXGET_PWD}"
+  $STD flexget web passwd "${FLEXGET_PWD}"
   msg_ok "Web-UI password set"
 
   if grep -q '^web_server:' "${FLEXGET_CONFIG_FILE}"; then
@@ -133,11 +143,6 @@ else
   echo -e "${INFO}${YW} FlexGet Web-UI config skipped${CL}"
 fi
 
-#echo -e "${INFO}${YW} Starting FlexGet daemon${CL}"
-#flexget daemon start -d --autoreload-config
-#echo -e ""
-#msg_ok "Started FlexGet"
-
 msg_info "Setup flexget to run at startup"
 cat <<EOF >/etc/systemd/system/flexget.service
 [Unit]
@@ -145,12 +150,9 @@ Description=Flexget Daemon
 After=network.target
 
 [Service]
+Type=simple
 Restart=on-failure
 RestartSec=5s
-Type=simple
-User=root
-Group=root
-UMask=000
 WorkingDirectory=/etc/flexget
 ExecStart=/root/.local/bin/flexget daemon start --autoreload-config
 ExecStop=/root/.local/bin/flexget daemon stop
@@ -161,15 +163,15 @@ WantedBy=multi-user.target
 EOF
 
 echo -e "${INFO}${YW} Starting FlexGet daemon${CL}"
-systemctl enable -q --now flexget
+$STD systemctl enable -q --now flexget
 echo -e ""
 msg_ok "Started FlexGet"
 
 msg_info "Cleaning up"
 #rm -f "${temp_file}"
 #rm -f /tmp/flexget_release_${RELEASE}/*
-rm -f "${TEMP_CONFIG_FILE}"
-rm -f "${TEMP_WEBGUI_ENABLE}"
+$STD rm -f "${TEMP_CONFIG_FILE}"
+$STD rm -f "${TEMP_WEBGUI_ENABLE}"
 
 echo -e "${INFO}${YW} Created FlexGet config file is located at '/etc/flexget/config.yml'${CL}" 
 echo -e "${INFO}${YW} FlexGet is configured as Daemon. Use 'schedules' in your config${CL}"
