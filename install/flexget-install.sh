@@ -122,6 +122,7 @@ if [ "${enable_webui}" = "1" ]; then
       FLEXGET_PWD="${FLEXGET_PWD:-$GEN_PWD}"
   fi
 
+  msg_info "Setting Flexget Web-UI password"
   $STD flexget web passwd "${FLEXGET_PWD}"
   msg_ok "Web-UI password set"
 
@@ -185,7 +186,7 @@ echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler${CL}"
 
 msg_info "You Flexget Web-UI password is:  ${FLEXGET_PWD}"
 msg_info "Be sure to save this somewhere safe"
-msg_info "To update Flexget Web-UI password in the future, use 'flexget web passwd NeW-sTrOnG-pAsSwOrD_hErE12@!'"
+msg_info "To update Flexget Web-UI password in the future, use 'flexget web passwd NeW-sTrOnG-pAsSwOrD_hErE12!'"
 
 motd_ssh
 customize
