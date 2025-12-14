@@ -87,6 +87,28 @@ flexget daemon start -d --autoreload-config
 echo -e ""
 msg_ok "Started FlexGet"
 
+msg_info "Setup flexget to run at startup"
+cat <<EOF >/etc/systemd/system/flexget.service
+[Unit]
+Description=Flexget Automation Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/local/bin/flexget daemon start --autoreload-config
+Restart=always
+RestartSec=5s
+#StandardOutput=journal
+#StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable -q --now flexget
+
 msg_info "Cleaning up"
 #rm -f "${temp_file}"
 #rm -f /tmp/flexget_release_${RELEASE}/*
