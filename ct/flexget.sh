@@ -27,33 +27,36 @@ function update_script() {
   msg_info "Stop existing Flexget daemon (if exists)"
   TIMEOUT=60
   SLEEP_INTERVAL=2  
-
-  # Check if the process is running using case-insensitive search (-i)
+  # Check if FlexGet process is running
   if pgrep -fi "${APP}" > /dev/null; then
-      echo "INFO: ${APP} is running, stopping before update..."
-      flexget daemon stop 
+      msg_info "${APP} is running, attempting graceful stop..."
+      flexget daemon stop
+      msg_info "Waiting up to ${TIMEOUT}s for ${APP} to stop..."
       
-      echo "INFO: Waiting up to ${TIMEOUT} seconds for ${APP} to stop..."
-      
-      TIMER=0
-      # Loop while the process is running AND the timer hasn't exceeded the timeout
-      # pgrep -fi ensures case-insensitive rechecking
-      while pgrep -fi "${APP}" > /dev/null && [ $TIMER -lt $TIMEOUT ]; do
+      END_TIME=$(( $(date +%s) + TIMEOUT ))
+      until ! pgrep -fi "${APP}" > /dev/null || [ $(date +%s) -ge $END_TIME ]; do
           sleep $SLEEP_INTERVAL
-          TIMER=$(( TIMER + SLEEP_INTERVAL ))
       done
   
-      # Final check to determine the outcome
+      # Final status check and kill if still exists
       if pgrep -fi "${APP}" > /dev/null; then
-          echo "ERROR: Timeout reached! ${APP} process did not stop within ${TIMEOUT} seconds."
+          msg_info "Graceful stop failed. Killing ${APP}..."
+          pkill -9 -f -i "${APP}"
+
+          if ! pgrep -fi "${APP}" > /dev/null; then
+              msg_ok "${APP} force-killed successfully."
+          else
+              msg_error "FATAL ERROR: Failed to kill ${APP} process."
+              exit 1
+          fi
       else
-          echo "SUCCESS: ${APP} stopped successfully."
+          msg_ok "${APP} stopped successfully."
       fi
   else
-      echo "INFO: ${APP} is NOT running."
+      msg_ok "${APP} is NOT running."
   fi
   
-  msg_info "Setting up uv python"
+  msg_info "Updating uv python"
   PYTHON_VERSION="3.13" setup_uv
   msg_ok "Updated uv"
 
