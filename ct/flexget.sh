@@ -25,13 +25,28 @@ function update_script() {
   check_container_resources
  
   msg_info "Stop existing Flexget daemon (if exists)"
-  # The [f]lexget trick prevents the grep command from matching itself
-  if ps aux | grep "[f]lexget" > /dev/null; then
-      msg_info "flexget is running (via ps/grep) so stopping before we update"
-	  flexget daemon stop
+  TIMEOUT=60
+  SLEEP_INTERVAL=2  
+
+  if pgrep -f "${APP}" > /dev/null; then
+      echo "INFO: ${APP} is running, stopping before update..."
+      flexget daemon stop
+      echo "INFO: Waiting up to ${TIMEOUT} seconds for ${APP} to stop..."
+      
+      TIMER=0
+      while pgrep -f "${APP}" > /dev/null && [ $TIMER -lt $TIMEOUT ]; do
+          sleep $SLEEP_INTERVAL
+          TIMER=$(( TIMER + SLEEP_INTERVAL ))
+      done
+  
+      if pgrep -f "${APP}" > /dev/null; then
+          echo "ERROR: Timeout reached! ${APP} process did not stop within ${TIMEOUT} seconds."
+      else
+          echo "SUCCESS: ${APP} stopped successfully."
+      fi
   else
-      msg_info "flexget is NOT running (via ps/grep)."
-  fi  
+      echo "INFO: ${APP} is NOT running."
+  fi
   
   msg_info "Setting up uv python"
   PYTHON_VERSION="3.13" setup_uv
@@ -40,7 +55,7 @@ function update_script() {
   msg_info "Updating FlexGet (uv-based version)"
   #$STD uv tool upgrade --python 3.13 flexget[locked,all]
   #systemctl restart open-webui
-  msg_ok "Updated FlexGetx"
+  msg_ok "Updated FlexGet"
   
   msg_info "Starting FlexGet daemon"
   echo -e "\n"
