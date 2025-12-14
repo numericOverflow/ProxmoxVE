@@ -38,7 +38,7 @@ function update_script() {
           sleep $SLEEP_INTERVAL
           TIMER=$(( TIMER + SLEEP_INTERVAL ))
       done
-  
+
       if pgrep -f "${APP}" > /dev/null; then
           echo "ERROR: Timeout reached! ${APP} process did not stop within ${TIMEOUT} seconds."
       else
