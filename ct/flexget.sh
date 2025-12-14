@@ -30,7 +30,7 @@ function update_script() {
   fi
   
   msg_info "Stop existing Flexget daemon (if exists)"
-  systemctl stop flexget
+  $STD systemctl stop flexget
   msg_ok "Started FlexGet"
 
   msg_info "Updating uv python"
@@ -42,8 +42,7 @@ function update_script() {
   msg_ok "Updated FlexGet"
   
   msg_info "Starting FlexGet daemon"
-  echo ""
-  flexget daemon start -d --autoreload-config
+  $STD flexget daemon start -d --autoreload-config
   msg_ok "Updated successfully!"
   exit
 }
