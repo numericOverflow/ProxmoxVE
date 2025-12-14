@@ -15,9 +15,6 @@ setting_up_container
 network_check
 update_os
 
-echo -e "FUNCTIONS_FILE_PATH:"
-echo -e "$FUNCTIONS_FILE_PATH"
-
 msg_info "Setting up uv Python"
 PYTHON_VERSION="3.13" setup_uv
 #echo 'export PATH=/root/.local/bin:$PATH' >>~/.bashrc
@@ -58,7 +55,8 @@ cat <<EOF > /etc/logrotate.d/flexget-log
 EOF
 msg_ok "Log rotation added"
 
-echo -e "${INFO}${YW} Generating FlexGet default HTTPS certificates${CL}"
+#echo -e "${INFO}${YW} Generating FlexGet default HTTPS certificates${CL}"
+msg_info "Generating FlexGet default HTTPS certificates"
 if [ ! -f /etc/flexget/ssl/flexget.pem ] || [ ! -f /etc/flexget/ssl/flexget.key ]; then
   $STD openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -subj "/O=Flexget Web-UI/OU=Dummy Certificate/CN=localhost" -keyout /etc/flexget/ssl/flexget.key -out /etc/flexget/ssl/flexget.pem
   chmod 600 /etc/flexget/ssl/flexget.pem
@@ -103,12 +101,9 @@ if command -v whiptail >/dev/null 2>&1; then
 fi
 
 if [ "${enable_webui}" = "1" ]; then
-  echo -e "${INFO}${YW} Configuring FlexGet Web-UI${CL}"
-  
   GEN_PWD=$(openssl rand -base64 99 | tr -dc 'a-zA-Z0-9' | head -c16)
 
   if command -v whiptail >/dev/null 2>&1; then
-      
       PWD_OUT=$(whiptail --inputbox "Please enter the web-ui password (leave blank to generate):" 8 60 "${GEN_PWD}" 3>&1 1>&2 2>&3)
       WHIPTAIL_STATUS=$?
   
@@ -117,9 +112,6 @@ if [ "${enable_webui}" = "1" ]; then
       else
           FLEXGET_PWD="${GEN_PWD}"
       fi
-  else
-      read -r -p "${TAB3}Please enter the web-ui password [${GEN_PWD}]:" FLEXGET_PWD
-      FLEXGET_PWD="${FLEXGET_PWD:-$GEN_PWD}"
   fi
 
   msg_info "Setting Flexget Web-UI password"
@@ -147,7 +139,7 @@ EOF
   fi
   msg_ok "Web-UI config complete"
 else
-  echo -e "${INFO}${YW} FlexGet Web-UI config skipped${CL}"
+   msg_error "FlexGet Web-UI config skipped"
 fi
 
 msg_info "Setup flexget to run at startup"
@@ -168,8 +160,10 @@ ExecReload=/root/.local/bin/flexget daemon reload --autoreload-config
 [Install]
 WantedBy=multi-user.target
 EOF
+msg_ok "FlexGet will run at startup"
 
-echo -e "${INFO}${YW} Starting FlexGet daemon${CL}"
+#echo -e "${INFO}${YW} Starting FlexGet daemon${CL}"
+msg_info "Starting FlexGet daemon"
 $STD systemctl enable -q --now flexget
 echo -e ""
 msg_ok "Started FlexGet"
@@ -179,14 +173,18 @@ msg_info "Cleaning up"
 #rm -f /tmp/flexget_release_${RELEASE}/*
 $STD rm -f "${TEMP_CONFIG_FILE}"
 $STD rm -f "${TEMP_WEBGUI_ENABLE}"
+apt-get -y autoremove
+apt-get -y autoclean
+msg_ok "Cleanup complete"
 
 echo -e "${INFO}${YW} Created FlexGet config file is located at '/etc/flexget/config.yml'${CL}" 
 echo -e "${INFO}${YW} FlexGet is configured as Daemon. Use 'schedules' in your config${CL}"
 echo -e "${INFO}${YW} https://flexget.com/Plugins/Daemon/scheduler${CL}"
 
-msg_info "You Flexget Web-UI password is:  ${FLEXGET_PWD}"
-msg_info "Be sure to save this somewhere safe"
-msg_info "To update Flexget Web-UI password in the future, use 'flexget web passwd NeW-sTrOnG-pAsSwOrD_hErE12!'"
+echo -e "${INFO}${YW} You Flexget Web-UI password is:  ${FLEXGET_PWD}${CL}"
+echo -e "${INFO}${YW} Be sure to save this somewhere safe${CL}"
+echo -e "${INFO}${YW} To update Flexget Web-UI password in the future, use 'flexget web passwd NeW-sTrOnG-pAsSwOrD_hErE12!'${CL}"
+
 
 motd_ssh
 customize
