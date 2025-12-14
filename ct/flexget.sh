@@ -33,6 +33,8 @@ function update_script() {
   $STD systemctl stop flexget
   msg_ok "Started FlexGet"
 
+  systemctl status flexget
+
   msg_info "Updating uv python"
   PYTHON_VERSION="3.13" setup_uv
   msg_ok "Updated uv"
