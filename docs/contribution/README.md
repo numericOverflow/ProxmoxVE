@@ -96,7 +96,7 @@ All scripts and configurations must follow our coding standards to ensure consis
 ### Available Guides
 
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Essential coding standards and best practices
-- **[CODE_AUDIT.md](CODE_AUDIT.md)** - Code review checklist and audit procedures
+- **[CODE-AUDIT.md](CODE-AUDIT.md)** - Code review checklist and audit procedures
 - **Container Scripts** - `/ct/` templates and guidelines
 - **Install Scripts** - `/install/` templates and guidelines
 - **JSON Configurations** - `/json/` structure and format
@@ -118,7 +118,7 @@ All scripts and configurations must follow our coding standards to ensure consis
 
 Before submitting a pull request, ensure your code passes our audit:
 
-**See**: [CODE_AUDIT.md](CODE_AUDIT.md) for complete audit checklist
+**See**: [CODE-AUDIT.md](CODE-AUDIT.md) for complete audit checklist
 
 Key points:
 - Code consistency with existing scripts
@@ -301,13 +301,13 @@ bash docs/contribution/setup-fork.sh
 ### For Experienced Developers
 
 1. Review [CONTRIBUTING.md](CONTRIBUTING.md) - Coding standards
-2. Review [CODE_AUDIT.md](CODE_AUDIT.md) - Audit checklist
+2. Review [CODE-AUDIT.md](CODE-AUDIT.md) - Audit checklist
 3. Check templates in `/ct/` and `/install/`
 4. Submit PR with confidence
 
 ### For Reviewers/Maintainers
 
-1. Use [CODE_AUDIT.md](CODE_AUDIT.md) as review guide
+1. Use [CODE-AUDIT.md](CODE-AUDIT.md) as review guide
 2. Reference [docs/TECHNICAL_REFERENCE.md](../TECHNICAL_REFERENCE.md) for architecture
 3. Check [docs/EXIT_CODES.md](../EXIT_CODES.md) for error handling
 
