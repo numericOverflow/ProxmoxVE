@@ -17,8 +17,6 @@ update_os
 
 msg_info "Setting up uv Python"
 PYTHON_VERSION="3.13" setup_uv
-#echo 'export PATH=/root/.local/bin:$PATH' >>~/.bashrc
-#export PATH="/root/.local/bin:$PATH"
 msg_ok "Installed uv"
 
 msg_info "Adding flexget bin to PATH"
@@ -49,8 +47,6 @@ cat <<EOF > /etc/logrotate.d/flexget-log
     compress
     missingok
     notifempty
-    create 0600 root root
-    su root root
 }
 EOF
 msg_ok "Log rotation added"
@@ -62,15 +58,15 @@ if [ ! -f /etc/flexget/ssl/flexget.pem ] || [ ! -f /etc/flexget/ssl/flexget.key 
   chmod 600 /etc/flexget/ssl/flexget.pem
   chmod 600 /etc/flexget/ssl/flexget.key
 fi
-msg_ok "Certs created"  
+msg_ok "Certs created"
 
 msg_info "Creating basic FlexGet config.yml"
-TEMP_CONFIG_FILE=$(mktemp) 
+TEMP_CONFIG_FILE=$(mktemp)
 FLEXGET_CONFIG_FILE="/etc/flexget/config.yml"
 mkdir -p "$(dirname "${FLEXGET_CONFIG_FILE}")"
 
 if [ -f "${FLEXGET_CONFIG_FILE}" ]; then
-    echo -e "${INFO}${YW} The FlexGet config file already exists so we will not modify it.${CL}"
+	msg_ok "The FlexGet config file already exists so we will not modify it"
 else
 	# Write generic config directly to final file (no need for temp file here)
 	cat <<EOF > "${FLEXGET_CONFIG_FILE}"
@@ -89,8 +85,9 @@ tasks:
     mock:
       - title: entry 1
 EOF
-fi
 msg_ok "Created FlexGet config file located at '/etc/flexget/config.yml'"
+fi
+
 
 if command -v whiptail >/dev/null 2>&1; then
   if whiptail --title "FlexGet Web-UI" --yesno "Would you like to enable the FlexGet Web-UI now?" 8 60; then
@@ -106,7 +103,7 @@ if [ "${enable_webui}" = "1" ]; then
   if command -v whiptail >/dev/null 2>&1; then
       PWD_OUT=$(whiptail --inputbox "Please enter the web-ui password (leave blank to generate):" 8 60 "${GEN_PWD}" 3>&1 1>&2 2>&3)
       WHIPTAIL_STATUS=$?
-  
+
       if [ ${WHIPTAIL_STATUS} -eq 0 ]; then
           FLEXGET_PWD="${PWD_OUT:-$GEN_PWD}"
       else
@@ -150,7 +147,7 @@ After=network.target
 
 [Service]
 Type=simple
-Restart=on-failure
+Restart=always
 RestartSec=5s
 WorkingDirectory=/etc/flexget
 ExecStart=/root/.local/bin/flexget daemon start --autoreload-config
@@ -165,7 +162,6 @@ msg_ok "FlexGet will run at startup"
 #echo -e "${INFO}${YW} Starting FlexGet daemon${CL}"
 msg_info "Starting FlexGet daemon"
 $STD systemctl enable -q --now flexget
-echo -e ""
 msg_ok "Started FlexGet"
 
 msg_info "Cleaning up"
@@ -177,14 +173,13 @@ apt-get -y autoremove
 apt-get -y autoclean
 msg_ok "Cleanup complete"
 
-echo -e "${INFO}${YW} Created FlexGet config file is located at '/etc/flexget/config.yml'${CL}" 
+echo -e "${INFO}${YW} Created FlexGet config file is located at '/etc/flexget/config.yml'${CL}"
 echo -e "${INFO}${YW} FlexGet is configured as Daemon. Use 'schedules' plugin in your config${CL}"
 echo -e "${INFO}${YW}     See: https://flexget.com/Plugins/Daemon/scheduler${CL}"
 
 echo -e "${INFO}${YW} You Flexget Web-UI password is:  ${FLEXGET_PWD}${CL}"
 echo -e "${INFO}${YW} Be sure to save this somewhere safe${CL}"
 echo -e "${INFO}${YW} To update Flexget Web-UI password in the future, use 'flexget web passwd NeW-sTrOnG-pAsSwOrD_hErE12!'${CL}"
-
 
 motd_ssh
 customize

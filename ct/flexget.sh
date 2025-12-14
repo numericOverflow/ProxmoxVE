@@ -28,12 +28,10 @@ function update_script() {
     msg_error "No ${APP} Installation Found!"
     exit
   fi
-  
+
   msg_info "Stop existing Flexget daemon (if exists)"
   $STD systemctl stop flexget
   msg_ok "Started FlexGet"
-
-  systemctl status flexget
 
   msg_info "Updating uv python"
   PYTHON_VERSION="3.13" setup_uv
@@ -42,7 +40,7 @@ function update_script() {
   msg_info "Updating FlexGet (uv-based version)"
   $STD uv tool upgrade --python 3.13 flexget[locked,all]
   msg_ok "Updated FlexGet"
-  
+
   msg_info "Starting FlexGet daemon"
   $STD flexget daemon start -d --autoreload-config
   msg_ok "Updated successfully!"
