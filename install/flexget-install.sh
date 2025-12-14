@@ -80,7 +80,7 @@ schedules:
   - tasks: '*'
     interval:
       hours: 1
-	  
+
 #Basic task structure - configure this
 tasks:
   test:
