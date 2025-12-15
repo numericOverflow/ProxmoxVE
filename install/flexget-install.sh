@@ -49,6 +49,8 @@ cat <<EOF > /etc/logrotate.d/flexget-log
     notifempty
 }
 EOF
+
+systemctl restart logrotate
 msg_ok "Log rotation added"
 
 #echo -e "${INFO}${YW} Generating FlexGet default HTTPS certificates${CL}"
